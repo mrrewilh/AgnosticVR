@@ -1,5 +1,5 @@
-appId: com.apprenticevr
-productName: apprenticevr
+appId: com.mythicquestvr
+productName: mythicquestvr
 directories:
   buildResources: build
 icon: build/icon
@@ -31,7 +31,7 @@ win:
       arch:
         - x64
         - ia32
-  executableName: apprenticevr
+  executableName: mythicquestvr
 nsis:
   artifactName: ${name}-${version}-setup-${arch}.${ext}
   shortcutName: ${productName}
@@ -49,8 +49,8 @@ mac:
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-    - CFBundleName: apprenticevr
-    - CFBundleDisplayName: apprenticevr
+    - CFBundleName: mythicquestvr
+    - CFBundleDisplayName: mythicquestvr
   notarize: false
   icon: build/icon.icns
 dmg:
@@ -65,16 +65,28 @@ linux:
       arch:
         - x64
         - arm64
+    - target: rpm
+      arch:
+        - x64
+        - arm64
   maintainer: electronjs.org
   category: Utility
 appImage:
   artifactName: ${name}-${version}-${arch}.${ext}
 deb:
   artifactName: ${name}-${version}-${arch}.${ext}
+rpm:
+  artifactName: ${name}-${version}-${arch}.${ext}
+  fpm:
+    - --rpm-rpmbuild-define=_build_id_links none
+    - --rpm-rpmbuild-define=__strip /bin/true
+    - --rpm-rpmbuild-define=__find_requires /bin/true
+    - --rpm-rpmbuild-define=__find_provides /bin/true
+    - --rpm-rpmbuild-define=debug_package %{nil}
 npmRebuild: false
 publish:
   provider: github
-  owner: jimzrt
-  repo: apprenticevr
+  owner: slax81
+  repo: mythicquestvr
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

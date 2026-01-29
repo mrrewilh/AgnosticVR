@@ -520,19 +520,18 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
                 </div>
               </div>
               <Divider style={{ marginTop: tokens.spacingVerticalS }} />
-              <div className={styles.noteSection}>
-                <Text weight="semibold" className={styles.noteTitle}>
-                  Note:
-                </Text>
-                {loadingNote ? (
-                  <Spinner size="tiny" label="Loading note..." />
-                ) : currentGameNote ? (
-                  <div className={styles.noteContent}>{currentGameNote}</div>
-                ) : (
-                  <Text>No note available.</Text>
-                )}
-              </div>
-
+              {loadingNote ? (
+                <Spinner size="tiny" label="Loading note..." />
+              ) : (
+                currentGameNote && (
+                  <div className={styles.noteSection}>
+                    <Text weight="semibold" className={styles.noteTitle}>
+                      Note:
+                    </Text>
+                    <div className={styles.noteContent}>{currentGameNote}</div>
+                  </div>
+                )
+              )}
               <div className={styles.trailerSection}>
                 <div className={styles.trailerTitle}>
                   <VideoRegular fontSize={16} />

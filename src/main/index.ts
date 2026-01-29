@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, dialog, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, protocol, dialog, ipcMain, session, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -53,14 +53,23 @@ function sendDependencyProgress(
 }
 
 function createWindow(): void {
+  const { width: workAreaWidth, height: workAreaHeight } = screen.getPrimaryDisplay().workArea
+
+  const defaultWidth = 1200
+  const defaultHeight = 700
+
+  const windowWidth = Math.min(defaultWidth, workAreaWidth)
+  const windowHeight = Math.min(defaultHeight, workAreaHeight)
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1200,
-    minWidth: 1200,
-    height: 900,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: Math.min(defaultWidth, workAreaWidth),
+    minHeight: Math.min(defaultHeight, workAreaHeight),
     show: false,
     autoHideMenuBar: true,
-    title: 'apprenticevr',
+    title: 'mythicquestvr',
     icon: icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -70,10 +79,16 @@ function createWindow(): void {
   })
 
   // Explicitly set minimum size to ensure constraint is enforced
-  mainWindow.setMinimumSize(1200, 900)
+  mainWindow.setMinimumSize(
+    Math.min(defaultWidth, workAreaWidth),
+    Math.min(defaultHeight, workAreaHeight)
+  )
 
   mainWindow.on('ready-to-show', async () => {
     if (mainWindow) {
+      // Reinforce bounds and center before showing to avoid visible jumping/resizing
+      mainWindow.setBounds({ width: windowWidth, height: windowHeight })
+      mainWindow.center()
       mainWindow.show()
 
       // Use .on, could be requested again?
@@ -181,13 +196,23 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.apprenticevr')
+  electronApp.setAppUserModelId('com.mythicquestvr')
 
   // Setup file protocol handler for local resources
   protocol.registerFileProtocol('file', (request, callback) => {
     const pathname = decodeURI(request.url.replace('file:///', ''))
     callback(pathname)
   })
+
+  // Configure session to set referer header for YouTube embeds
+  // This fixes the "embedder.identity.missing.referrer" error
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ['https://*.youtube.com/*', 'https://*.googlevideo.com/*'] },
+    (details, callback) => {
+      details.requestHeaders['Referer'] = 'https://github.com/slax81/MythicQuestVR'
+      callback({ requestHeaders: details.requestHeaders })
+    }
+  )
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

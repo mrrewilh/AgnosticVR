@@ -125,7 +125,7 @@ class DependencyService {
           timeout: 10000, // 10 second timeout
           validateStatus: (status) => status < 500, // Accept any non-server-error status
           headers: {
-            'User-Agent': 'ApprenticeVR/1.0'
+            'User-Agent': 'MythicQuestVR/1.0'
           }
         })
         console.log(`✓ ${name} is reachable`)

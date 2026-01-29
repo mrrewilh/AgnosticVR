@@ -73,8 +73,8 @@ jobs:
             echo "ARTIFACT_PATH=${OUTPUT_DIR}/${PRODUCT_NAME}-${VERSION}-*.dmg" >> $GITHUB_OUTPUT
           elif [ "$RUNNER_OS" == "Linux" ]; then
             echo "BUILD_COMMAND=pnpm run build && pnpm exec electron-builder --linux --publish never" >> $GITHUB_OUTPUT
-            # Linux builds both AppImage and DEB files - match files ending with either extension
-            echo "ARTIFACT_PATH=${OUTPUT_DIR}/${PRODUCT_NAME}-${VERSION}-*.[Ad]*" >> $GITHUB_OUTPUT
+            # Linux builds AppImage, DEB, and RPM files
+            echo "ARTIFACT_PATH=${OUTPUT_DIR}/${PRODUCT_NAME}-${VERSION}-*.[Adr]*" >> $GITHUB_OUTPUT
           fi
 
       - name: Build application

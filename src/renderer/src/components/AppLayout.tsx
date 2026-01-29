@@ -177,7 +177,7 @@ const MainContent: React.FC<MainContentProps> = ({
             <Text style={{ marginTop: tokens.spacingVerticalM }}>
               For detailed troubleshooting, see:{' '}
               <a
-                href="https://github.com/jimzrt/apprenticeVr#troubleshooting-guide"
+                href="https://github.com/slax81/mythicquestvr#troubleshooting-guide"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: tokens.colorBrandForeground1 }}
@@ -415,7 +415,7 @@ const AppLayout: React.FC = () => {
               <div className={styles.header}>
                 <div className={styles.headerContent}>
                   <img alt="logo" className={styles.logo} src={electronLogo} />
-                  <Title1>Apprentice VR</Title1>
+                  <Title1>MythicQuestVR</Title1>
                 </div>
                 <div className={styles.headerActions}>
                   {currentView !== AppView.DEVICE_LIST && (

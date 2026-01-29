@@ -63,7 +63,7 @@ class LogsService implements LogsAPI {
 
       // Create a Blob for the zip file content and append it
       const fileBlob = new Blob([zipContent], { type: 'application/zip' })
-      formData.append('fileToUpload', fileBlob, 'apprenticevr-main.log.zip')
+      formData.append('fileToUpload', fileBlob, 'mythicquestvr-main.log.zip')
 
       // Upload to catbox.moe
       const response = await fetch('https://catbox.moe/user/api.php', {

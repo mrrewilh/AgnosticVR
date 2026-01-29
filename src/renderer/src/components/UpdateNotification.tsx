@@ -306,7 +306,7 @@ export function UpdateNotification(): React.ReactElement | null {
                   onClick={() => window.api.updates?.openRepositoryPage?.()}
                   style={{ padding: '0', height: 'auto', minHeight: 'auto' }}
                 >
-                  GitHub repository (https://github.com/jimzrt/apprenticeVr)
+                  GitHub repository (https://github.com/slax81/mythicquestvr)
                 </Button>{' '}
                 for full changelog and project details.
               </Text>

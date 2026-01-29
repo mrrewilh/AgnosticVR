@@ -1,10 +1,10 @@
-# ApprenticeVR
+# MythicQuestVR
 
-ApprenticeVR is a modern, cross-platform desktop application built with Electron, React, and TypeScript, designed for managing and sideloading content onto Meta Quest devices. It aims to provide a user-friendly and feature-rich alternative to existing sideloading tools.
+MythicQuestVR is a modern, cross-platform desktop application built with Electron, React, and TypeScript, designed for managing and sideloading content onto Meta Quest devices. It aims to provide a user-friendly and feature-rich alternative to existing sideloading tools.
 
 ## Inspiration
 
-This project is heavily inspired by the fantastic work done on [Rookie Sideloader](https://github.com/VRPirates/rookie). ApprenticeVR seeks to build upon that foundation by offering a contemporary interface and experience across Windows, macOS, and Linux.
+This project is heavily inspired by the fantastic work done on [Rookie Sideloader](https://github.com/VRPirates/rookie) and fork of abandoned [ApprenticeVR](https://github.com/jimzrt/apprenticevr). MythicQuestVR seeks to build upon that foundation by offering a contemporary interface and experience across Windows, macOS, and Linux.
 
 ## Features
 
@@ -33,7 +33,7 @@ This project is heavily inspired by the fantastic work done on [Rookie Sideloade
 
 ## Screenshots
 
-Here are some glimpses of ApprenticeVR in action:
+Here are some glimpses of ApprenticeVR / MythicQuestVR in action:
 
 **Device List (Dark Mode)**
 ![Device List - Dark Mode](screenshots/01_devices_dark.png)
@@ -49,29 +49,29 @@ Here are some glimpses of ApprenticeVR in action:
 
 ### macOS Specifics
 
-**Important:** Since the application is not signed by an Apple Developer ID, when you first try to open `apprenticevr.app` on macOS after building or downloading it, you might encounter an error message stating: `"apprenticeVR is damaged and can't be opened. You should move it to the Trash."`
+**Important:** Since the application is not signed by an Apple Developer ID, when you first try to open `mythicquestvr.app` on macOS after building or downloading it, you might encounter an error message stating: `"mythicquestvr is damaged and can't be opened. You should move it to the Trash."`
 
 This error occurs because macOS Gatekeeper flags applications downloaded from the internet or built by unidentified developers as potentially unsafe. The `com.apple.quarantine` extended attribute is added to the application bundle by the system.
 
 To resolve this, you can remove this extended attribute by running the following command in your Terminal:
 
 ```bash
-xattr -c /Applications/apprenticevr.app
+xattr -c /Applications/mythicquestvr.app
 ```
 
 **Note:**
-*   You might need to adjust the path `/Applications/apprenticevr.app` if you have placed the application in a different location.
+*   You might need to adjust the path `/Applications/mythicquestvr.app` if you have placed the application in a different location.
 *   The `-c` flag in the `xattr` command stands for "clear," and it removes all extended attributes from the specified file or application bundle. By removing the quarantine attribute, you are essentially telling macOS that you trust this application.
 
-After running this command, you should be able to open ApprenticeVR without any issues.
+After running this command, you should be able to open MythicQuestVR without any issues.
 
 ## Logs
 
 By default, it writes logs to the following locations:
 
- - **on Linux:** `~/.config/apprenticevr/logs/main.log`
- - **on macOS:** `~/Library/Logs/apprenticevr/main.log`
- - **on Windows:** `%USERPROFILE%\AppData\Roaming\apprenticevr\logs\main.log`
+ - **on Linux:** `~/.config/mythicquestvr/logs/main.log`
+ - **on macOS:** `~/Library/Logs/mythicquestvr/main.log`
+ - **on Windows:** `%USERPROFILE%\AppData\Roaming\mythicquestvr\logs\main.log`
 
 **Note:** When opening an issue, please include the latest log output from the appropriate log file above to help with debugging and troubleshooting.
 
@@ -79,14 +79,14 @@ You can also upload the current log file in the settings menu and share the url.
 
 # Troubleshooting Guide
 
-If ApprenticeVR is unable to connect, follow the steps below to identify and resolve the issue:
+If MythicQuestVR is unable to connect, follow the steps below to identify and resolve the issue:
 
 ---
 
 ## ✅ Use the Latest Version
 
-Make sure you're using the latest version of ApprenticeVR:  
-➡️ [https://github.com/jimzrt/apprenticevr](https://github.com/jimzrt/apprenticevr)
+Make sure you're using the latest version of MythicQuestVR:  
+➡️ [https://github.com/slax81/mythicquestvr](https://github.com/slax81/mythicquestvr)
 
 ---
 
