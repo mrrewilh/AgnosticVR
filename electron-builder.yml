@@ -1,5 +1,5 @@
-appId: com.mythicquestvr
-productName: mythicquestvr
+appId: com.agnosticvr
+productName: agnosticvr
 directories:
   buildResources: build
 icon: build/icon
@@ -31,7 +31,7 @@ win:
       arch:
         - x64
         - ia32
-  executableName: mythicquestvr
+  executableName: agnosticvr
 nsis:
   artifactName: ${name}-${version}-setup-${arch}.${ext}
   shortcutName: ${productName}
@@ -39,22 +39,6 @@ nsis:
   createDesktopShortcut: always
 portable:
   artifactName: ${name}-${version}-portable-${arch}.${ext}
-mac:
-  target:
-    - target: dmg
-      arch:
-        - x64
-        - arm64
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-    - CFBundleName: mythicquestvr
-    - CFBundleDisplayName: mythicquestvr
-  notarize: false
-  icon: build/icon.icns
-dmg:
-  artifactName: ${name}-${version}-${arch}.${ext}
 linux:
   target:
     - target: AppImage
@@ -87,6 +71,6 @@ npmRebuild: false
 publish:
   provider: github
   owner: slax81
-  repo: mythicquestvr
+  repo: agnosticvr
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
