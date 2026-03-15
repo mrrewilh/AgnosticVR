@@ -25,6 +25,7 @@ import {
 } from '@fluentui/react-icons'
 import { useMirrors } from '../hooks/useMirrors'
 import MirrorManagement from './MirrorManagement'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   container: {
@@ -58,6 +59,7 @@ const MirrorSelector: React.FC = () => {
     clearActiveMirror,
     testMirror
   } = useMirrors()
+  const { t } = useTranslation()
 
   const [showManagement, setShowManagement] = useState(false)
 
@@ -99,7 +101,7 @@ const MirrorSelector: React.FC = () => {
     return (
       <div className={styles.container}>
         <Spinner size="tiny" />
-        <Text>Loading mirrors...</Text>
+        <Text>{t('mirrorManagement.loadingMirrors')}</Text>
       </div>
     )
   }
@@ -154,14 +156,14 @@ const MirrorSelector: React.FC = () => {
           </Button>
         </DialogTrigger>
         <DialogSurface className={styles.managementDialog}>
-          <DialogTitle>Mirror Management</DialogTitle>
+          <DialogTitle>{t('mirrorManagement.title')}</DialogTitle>
           <DialogContent>
             <DialogBody>
               <MirrorManagement />
             </DialogBody>
             <DialogActions>
               <Button appearance="secondary" onClick={() => setShowManagement(false)}>
-                Close
+                {t('common.close')}
               </Button>
             </DialogActions>
           </DialogContent>

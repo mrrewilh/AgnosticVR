@@ -30,6 +30,7 @@ import {
 import { useSettings } from '../hooks/useSettings'
 import { useGames } from '../hooks/useGames'
 import { useLogs } from '../hooks/useLogs'
+import { useTranslation } from '../hooks/useTranslation'
 
 // Supported speed units with conversion factors to KB/s
 const SPEED_UNITS = [
@@ -149,6 +150,7 @@ const useStyles = makeStyles({
 
 const BlacklistSettings: React.FC = () => {
   const styles = useStyles()
+  const { t } = useTranslation()
   const { getBlacklistGames, removeGameFromBlacklist } = useGames()
   const [blacklistGames, setBlacklistGames] = useState<
     { packageName: string; version: number | 'any' }[]
@@ -165,7 +167,7 @@ const BlacklistSettings: React.FC = () => {
       setBlacklistGames(games)
     } catch (err) {
       console.error('Error loading blacklisted games:', err)
-      setError('Failed to load blacklisted games')
+      setError(t('errors.loadFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -188,35 +190,39 @@ const BlacklistSettings: React.FC = () => {
       }, 3000)
     } catch (err) {
       console.error('Error removing game from blacklist:', err)
-      setError('Failed to remove game from blacklist')
+      setError(t('errors.generic'))
     }
   }
 
   return (
     <Card className={styles.card}>
-      <CardHeader description={<Subtitle1 weight="semibold">Blacklisted Games</Subtitle1>} />
+      <CardHeader
+        description={<Subtitle1 weight="semibold">{t('settings.blacklist')}</Subtitle1>}
+      />
       <div className={styles.cardContent}>
-        <Text>Manage games that will not prompt for uploads</Text>
+        <Text>{t('settings.blacklistDescription')}</Text>
 
         {isLoading ? (
           <div
             style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}
           >
-            <Spinner size="small" label="Loading blacklisted games..." />
+            <Spinner size="small" label={t('common.loading')} />
           </div>
         ) : (
           <>
             {blacklistGames.length === 0 ? (
               <div className={styles.emptyState}>
-                <Text>No blacklisted games found</Text>
+                <Text>{t('settings.noBlacklistedGames')}</Text>
               </div>
             ) : (
               <Table className={styles.blacklistTable}>
                 <TableHeader>
                   <TableRow>
-                    <TableHeaderCell>Package Name</TableHeaderCell>
-                    <TableHeaderCell>Version</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '100px' }}>Actions</TableHeaderCell>
+                    <TableHeaderCell>{t('settings.packageName')}</TableHeaderCell>
+                    <TableHeaderCell>{t('settings.version')}</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '100px' }}>
+                      {t('settings.actions')}
+                    </TableHeaderCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -227,7 +233,7 @@ const BlacklistSettings: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <TableCellLayout>
-                          {game.version === 'any' ? 'All Versions' : game.version}
+                          {game.version === 'any' ? t('settings.unlimited') : game.version}
                         </TableCellLayout>
                       </TableCell>
                       <TableCell>
@@ -236,7 +242,7 @@ const BlacklistSettings: React.FC = () => {
                           appearance="subtle"
                           className={styles.actionButton}
                           onClick={() => handleRemoveFromBlacklist(game.packageName)}
-                          aria-label="Remove from blacklist"
+                          aria-label={t('settings.removeFromBlacklist')}
                         />
                       </TableCell>
                     </TableRow>
@@ -249,7 +255,7 @@ const BlacklistSettings: React.FC = () => {
             {removeSuccess && (
               <Text className={styles.success}>
                 <CheckmarkCircleRegular />
-                Game removed from blacklist successfully
+                {t('settings.blacklistRemoveSuccess')}
               </Text>
             )}
           </>
@@ -261,6 +267,7 @@ const BlacklistSettings: React.FC = () => {
 
 const LogUploadSettings: React.FC = () => {
   const styles = useStyles()
+  const { t } = useTranslation()
   const {
     isUploading,
     uploadError,
@@ -290,9 +297,11 @@ const LogUploadSettings: React.FC = () => {
 
   return (
     <Card className={styles.card}>
-      <CardHeader description={<Subtitle1 weight="semibold">Log Upload</Subtitle1>} />
+      <CardHeader
+        description={<Subtitle1 weight="semibold">{t('settings.logUpload')}</Subtitle1>}
+      />
       <div className={styles.cardContent}>
-        <Text>Upload the current log file to https://catbox.moe for sharing with support</Text>
+        <Text>{t('settings.logUploadDescription')}</Text>
 
         <div className={styles.formRow}>
           <Button
@@ -302,7 +311,7 @@ const LogUploadSettings: React.FC = () => {
             disabled={isUploading}
             icon={<ShareRegular />}
           >
-            {isUploading ? 'Uploading...' : 'Upload Current Log'}
+            {isUploading ? t('settings.uploading') : t('settings.uploadLog')}
           </Button>
         </div>
 
@@ -312,12 +321,12 @@ const LogUploadSettings: React.FC = () => {
           <div className={styles.success}>
             <CheckmarkCircleRegular />
             <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
-              <Text>Log uploaded successfully!</Text>
+              <Text>{t('settings.logUploaded')}</Text>
 
               <div
                 style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}
               >
-                <Text weight="semibold">URL:</Text>
+                <Text weight="semibold">{t('settings.url')}</Text>
                 <div
                   style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}
                 >
@@ -327,7 +336,7 @@ const LogUploadSettings: React.FC = () => {
                     style={{ flexGrow: 1, fontFamily: 'monospace', fontSize: '12px' }}
                   />
                   <Button onClick={handleCopyUrl} size="small" appearance="secondary">
-                    Copy URL
+                    {t('settings.copyUrl')}
                   </Button>
                 </div>
               </div>
@@ -340,7 +349,7 @@ const LogUploadSettings: React.FC = () => {
                     gap: tokens.spacingVerticalXS
                   }}
                 >
-                  <Text weight="semibold">Password:</Text>
+                  <Text weight="semibold">{t('settings.password')}</Text>
                   <div
                     style={{
                       display: 'flex',
@@ -359,7 +368,7 @@ const LogUploadSettings: React.FC = () => {
                       }}
                     />
                     <Button onClick={handleCopyPassword} size="small" appearance="secondary">
-                      Copy Password
+                      {t('settings.copyPassword')}
                     </Button>
                   </div>
                 </div>
@@ -370,8 +379,7 @@ const LogUploadSettings: React.FC = () => {
 
         <Text className={styles.hint}>
           <InfoRegular />
-          The uploaded log file will be available on catbox.moe. Share only the URL with support for
-          troubleshooting.
+          {t('settings.logUploadHint')}
         </Text>
       </div>
     </Card>
@@ -380,6 +388,7 @@ const LogUploadSettings: React.FC = () => {
 
 const Settings: React.FC = () => {
   const styles = useStyles()
+  const { t, language } = useTranslation()
   const {
     downloadPath,
     downloadSpeedLimit,
@@ -388,7 +397,8 @@ const Settings: React.FC = () => {
     error,
     setDownloadPath,
     setDownloadSpeedLimit,
-    setUploadSpeedLimit
+    setUploadSpeedLimit,
+    setLanguage
   } = useSettings()
   const [editedDownloadPath, setEditedDownloadPath] = useState(downloadPath)
 
@@ -435,7 +445,7 @@ const Settings: React.FC = () => {
 
   const handleSaveDownloadPath = async (): Promise<void> => {
     if (!editedDownloadPath) {
-      setLocalError('Download path cannot be empty')
+      setLocalError(t('errors.selectFolder'))
       return
     }
 
@@ -453,7 +463,7 @@ const Settings: React.FC = () => {
       }, 3000)
     } catch (err) {
       console.error('Error saving download path:', err)
-      setLocalError('Failed to save download path')
+      setLocalError(t('errors.saveFailed'))
     }
   }
 
@@ -473,7 +483,7 @@ const Settings: React.FC = () => {
       } else {
         const inputValue = parseFloat(downloadSpeedInput)
         if (isNaN(inputValue)) {
-          setLocalError('Please enter valid numbers for speed limits')
+          setLocalError(t('errors.invalidSpeed'))
           return
         }
         const factor = SPEED_UNITS.find((u) => u.value === downloadSpeedUnit)?.factor || 1
@@ -487,7 +497,7 @@ const Settings: React.FC = () => {
       } else {
         const inputValue = parseFloat(uploadSpeedInput)
         if (isNaN(inputValue)) {
-          setLocalError('Please enter valid numbers for speed limits')
+          setLocalError(t('errors.invalidSpeed'))
           return
         }
         const factor = SPEED_UNITS.find((u) => u.value === uploadSpeedUnit)?.factor || 1
@@ -514,7 +524,7 @@ const Settings: React.FC = () => {
       }, 3000)
     } catch (err) {
       console.error('Error saving speed limits:', err)
-      setLocalError('Failed to save speed limits')
+      setLocalError(t('errors.saveFailed'))
     }
   }
 
@@ -526,7 +536,7 @@ const Settings: React.FC = () => {
       }
     } catch (err) {
       console.error('Error selecting folder:', err)
-      setLocalError('Failed to select folder')
+      setLocalError(t('errors.selectFolder'))
     }
   }
 
@@ -676,57 +686,88 @@ const Settings: React.FC = () => {
     <div className={styles.root}>
       <div className={styles.contentContainer}>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM }}>
-          <Title2 className={styles.headerTitle}>Application Settings</Title2>
-          {isLoading && <Spinner size="large" label="Loading settings..." />}
+          <Title2 className={styles.headerTitle}>{t('settings.title')}</Title2>
+          {isLoading && <Spinner size="large" label={t('common.loading')} />}
         </div>
         <Text as="p" className={styles.headerSubtitle}>
-          Configure application preferences and manage your downloads
+          {t('settings.subtitle')}
         </Text>
+
+        <Card className={styles.card}>
+          <CardHeader
+            description={<Subtitle1 weight="semibold">{t('settings.language')}</Subtitle1>}
+          />
+          <div className={styles.cardContent}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM }}>
+              <Text>{t('settings.selectLanguage')}</Text>
+              <Dropdown
+                style={{ minWidth: '150px' }}
+                value={language === 'tr' ? 'Türkçe' : 'English'}
+                selectedOptions={[language]}
+                onOptionSelect={(_, data) => {
+                  if (data.optionValue === 'en' || data.optionValue === 'tr') {
+                    setLanguage(data.optionValue)
+                  }
+                }}
+                mountNode={document.getElementById('portal')}
+              >
+                <Option value="en" text="English">
+                  English
+                </Option>
+                <Option value="tr" text="Türkçe">
+                  Türkçe
+                </Option>
+              </Dropdown>
+            </div>
+          </div>
+        </Card>
 
         <LogUploadSettings />
 
         <Card className={styles.card}>
-          <CardHeader description={<Subtitle1 weight="semibold">Download Settings</Subtitle1>} />
+          <CardHeader
+            description={<Subtitle1 weight="semibold">{t('settings.downloadSettings')}</Subtitle1>}
+          />
           <div className={styles.cardContent}>
-            <Text>Set where your games will be downloaded and stored on your device</Text>
+            <Text>{t('settings.downloadSettingsDescription')}</Text>
 
             <div className={styles.formRow}>
               <Input
                 className={styles.input}
                 value={editedDownloadPath}
                 onChange={(_, data) => setEditedDownloadPath(data.value)}
-                placeholder="Download path"
+                placeholder={t('settings.downloadPath')}
                 contentAfter={
                   <Button
                     icon={<FolderOpenRegular />}
                     onClick={handleSelectFolder}
-                    aria-label="Browse folders"
+                    aria-label={t('settings.browseFolders')}
                   />
                 }
                 size="large"
               />
               <Button onClick={handleSaveDownloadPath} appearance="primary" size="large">
-                Save Path
+                {t('settings.savePath')}
               </Button>
             </div>
 
             <div className={styles.speedLimitSection}>
-              <Text>Configure download and upload speed limits</Text>
+              <Text>{t('settings.speedLimits')}</Text>
 
               <div className={styles.speedFormRow}>
                 <div className={styles.speedControl}>
-                  <Text>Download Speed Limit</Text>
+                  <Text>{t('settings.downloadSpeedLimit')}</Text>
                   <div className={styles.speedInputGroup}>
                     <Input
                       className={styles.speedInput}
                       value={downloadSpeedInput}
                       onChange={(_, data) => handleDownloadInputChange(data.value)}
-                      placeholder="Unlimited"
+                      placeholder={t('settings.unlimited')}
                     />
                     <Dropdown
                       className={styles.unitDropdown}
                       value={SPEED_UNITS.find((u) => u.value === downloadSpeedUnit)?.label}
-                      label="Download Speed Limit Unit"
+                      label={t('settings.downloadSpeedLimitUnit')}
                       selectedOptions={[downloadSpeedUnit]}
                       onOptionSelect={(_, data) => {
                         if (data.optionValue) {
@@ -744,18 +785,18 @@ const Settings: React.FC = () => {
                   </div>
                   <Text className={styles.hint}>
                     <InfoRegular />
-                    Leave empty for unlimited download speed
+                    {t('settings.leaveEmptyUnlimited')}
                   </Text>
                 </div>
 
                 <div className={styles.speedControl}>
-                  <Text>Upload Speed Limit</Text>
+                  <Text>{t('settings.uploadSpeedLimit')}</Text>
                   <div className={styles.speedInputGroup}>
                     <Input
                       className={styles.speedInput}
                       value={uploadSpeedInput}
                       onChange={(_, data) => handleUploadInputChange(data.value)}
-                      placeholder="Unlimited"
+                      placeholder={t('settings.unlimited')}
                     />
                     <Dropdown
                       className={styles.unitDropdown}
@@ -777,7 +818,7 @@ const Settings: React.FC = () => {
                   </div>
                   <Text className={styles.hint}>
                     <InfoRegular />
-                    Leave empty for unlimited upload speed
+                    {t('settings.leaveEmptyUnlimitedUpload')}
                   </Text>
                 </div>
               </div>
@@ -787,7 +828,7 @@ const Settings: React.FC = () => {
                 style={{ justifyContent: 'flex-end', marginTop: tokens.spacingVerticalM }}
               >
                 <Button onClick={handleSaveSpeedLimits} appearance="primary" size="large">
-                  Save Speed Limits
+                  {t('settings.saveSpeedLimits')}
                 </Button>
               </div>
             </div>
@@ -797,7 +838,7 @@ const Settings: React.FC = () => {
             {saveSuccess && (
               <Text className={styles.success}>
                 <CheckmarkCircleRegular />
-                Settings saved successfully
+                {t('settings.settingsSaved')}
               </Text>
             )}
           </div>

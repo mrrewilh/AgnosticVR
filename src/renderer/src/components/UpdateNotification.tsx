@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-components'
 import { UpdateInfo } from '@shared/types'
 import { ArrowDownloadRegular, CodeRegular, DocumentTextRegular } from '@fluentui/react-icons'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   updateContent: {
@@ -116,6 +117,7 @@ export function UpdateNotification(): React.ReactElement | null {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<TabValue>('release-notes')
   const styles = useStyles()
+  const { t } = useTranslation()
 
   useEffect(() => {
     // Set up update listeners
@@ -189,32 +191,34 @@ export function UpdateNotification(): React.ReactElement | null {
     return null
   }
 
-  let dialogTitle = 'Update Check'
+  let dialogTitle = t('update.checking')
   let dialogIcon: React.ReactNode = null
   let dialogContent: React.ReactNode = null
 
   if (isChecking) {
-    dialogTitle = 'Checking for Updates'
+    dialogTitle = t('update.checking')
     dialogContent = (
       <div className={styles.spinnerContainer}>
         <Spinner size="tiny" />
-        <Text>Checking for the latest version...</Text>
+        <Text>{t('update.checkingForVersion')}</Text>
       </div>
     )
   } else if (updateError) {
-    dialogTitle = 'Update Error'
+    dialogTitle = t('update.error')
     dialogIcon = (
       <Badge appearance="filled" color="danger">
-        Error
+        {t('common.error')}
       </Badge>
     )
     dialogContent = (
       <div className={styles.updateContent}>
-        <Text>Failed to check for updates: {updateError.message}</Text>
+        <Text>
+          {t('update.failedCheck')} {updateError.message}
+        </Text>
       </div>
     )
   } else if (updateAvailable) {
-    dialogTitle = 'Update Available'
+    dialogTitle = t('update.available')
     dialogIcon = <ArrowDownloadRegular className={styles.icon} />
 
     const hasCommits = updateAvailable.commits && updateAvailable.commits.length > 0
@@ -226,14 +230,12 @@ export function UpdateNotification(): React.ReactElement | null {
         <div className={styles.contentWithIcon}>
           <div className={styles.releaseInfo}>
             <Text size="large">
-              A new version{' '}
-              <span className={styles.highlightVersion}>{updateAvailable.version}</span> is
-              available.
+              {t('update.newVersionAvailable', { version: updateAvailable.version })}
             </Text>
 
             {updateAvailable.releaseDate && (
               <Text size="small">
-                Released: {new Date(updateAvailable.releaseDate).toLocaleDateString()}
+                {t('update.released')} {new Date(updateAvailable.releaseDate).toLocaleDateString()}
               </Text>
             )}
 
@@ -246,12 +248,13 @@ export function UpdateNotification(): React.ReactElement | null {
                 >
                   {hasReleaseNotes && (
                     <Tab value="release-notes" icon={<DocumentTextRegular />}>
-                      Release Notes
+                      {t('update.releaseNotes')}
                     </Tab>
                   )}
                   {hasCommits && (
                     <Tab value="commits" icon={<CodeRegular />}>
-                      Changelog ({updateAvailable.commits?.length || 0} commits)
+                      {t('update.changelog')} ({updateAvailable.commits?.length || 0}{' '}
+                      {t('update.commits')})
                     </Tab>
                   )}
                 </TabList>
@@ -274,7 +277,9 @@ export function UpdateNotification(): React.ReactElement | null {
                           </div>
                           <div className={styles.commitMessage}>{commit.message}</div>
                           <div className={styles.commitMeta}>
-                            <span>by {commit.author}</span>
+                            <span>
+                              {t('update.by')} {commit.author}
+                            </span>
                             <span>
                               {formatCommitDate(commit.date)} •{' '}
                               <a
@@ -285,7 +290,7 @@ export function UpdateNotification(): React.ReactElement | null {
                                   window.api.updates?.openDownloadPage?.(commit.url)
                                 }}
                               >
-                                View commit
+                                {t('update.viewCommit')}
                               </a>
                             </span>
                           </div>
@@ -299,16 +304,15 @@ export function UpdateNotification(): React.ReactElement | null {
 
             <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #e0e0e0' }}>
               <Text size="small" style={{ color: '#666' }}>
-                Visit the{' '}
+                {t('update.viewReleases')}{' '}
                 <Button
                   appearance="transparent"
                   size="small"
                   onClick={() => window.api.updates?.openRepositoryPage?.()}
                   style={{ padding: '0', height: 'auto', minHeight: 'auto' }}
                 >
-                  GitHub repository (https://github.com/slax81/mythicquestvr)
+                  {t('update.githubRepo')} (https://github.com/slax81/mythicquestvr)
                 </Button>{' '}
-                for full changelog and project details.
               </Text>
             </div>
           </div>
@@ -332,19 +336,19 @@ export function UpdateNotification(): React.ReactElement | null {
             {updateError ? (
               <>
                 <Button appearance="secondary" onClick={handleDismiss}>
-                  Dismiss
+                  {t('update.dismiss')}
                 </Button>
                 <Button appearance="primary" onClick={handleCheckForUpdates}>
-                  Try Again
+                  {t('update.tryAgain')}
                 </Button>
               </>
             ) : updateAvailable ? (
               <>
                 <Button appearance="secondary" onClick={handleDismiss}>
-                  Remind Me Later
+                  {t('update.remindLater')}
                 </Button>
                 <Button appearance="secondary" onClick={handleViewReleases}>
-                  View Releases
+                  {t('update.viewReleases')}
                 </Button>
                 <Button
                   appearance="primary"
@@ -352,12 +356,12 @@ export function UpdateNotification(): React.ReactElement | null {
                   disabled={!updateAvailable.downloadUrl}
                   icon={<ArrowDownloadRegular />}
                 >
-                  Download Update
+                  {t('update.downloadUpdate')}
                 </Button>
               </>
             ) : (
               <Button appearance="secondary" onClick={handleDismiss}>
-                Close
+                {t('update.close')}
               </Button>
             )}
           </DialogActions>

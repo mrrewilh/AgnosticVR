@@ -14,6 +14,7 @@ import {
 import { useUpload } from '../hooks/useUpload'
 import { UploadItem } from '@shared/types'
 import { DismissRegular, DeleteRegular, ArrowCounterclockwiseRegular } from '@fluentui/react-icons'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   wrapper: {
@@ -39,6 +40,7 @@ const useStyles = makeStyles({
 const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
   const styles = useStyles()
   const { removeFromQueue, cancelUpload } = useUpload()
+  const { t } = useTranslation()
 
   let statusElement = <Text>{item.status}</Text>
   let actions: React.ReactNode = null
@@ -48,13 +50,13 @@ const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
 
   switch (item.status) {
     case 'Queued':
-      statusElement = <Text>Waiting in queue</Text>
+      statusElement = <Text>{t('uploads.waitingInQueue')}</Text>
       actions = (
         <Button
           icon={<DismissRegular />}
           appearance="subtle"
           onClick={() => removeFromQueue(item.packageName)}
-          aria-label="Remove from queue"
+          aria-label={t('uploads.removeFromQueue')}
         />
       )
       break
@@ -76,19 +78,19 @@ const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
           icon={<DismissRegular />}
           appearance="subtle"
           onClick={() => cancelUpload(item.packageName)}
-          aria-label="Cancel upload"
+          aria-label={t('uploads.cancelUpload')}
         />
       )
       break
 
     case 'Completed':
-      statusElement = <Text weight="semibold">Completed</Text>
+      statusElement = <Text weight="semibold">{t('downloads.completed')}</Text>
       actions = (
         <Button
           icon={<DeleteRegular />}
           appearance="subtle"
           onClick={() => removeFromQueue(item.packageName)}
-          aria-label="Remove from history"
+          aria-label={t('uploads.removeFromHistory')}
         />
       )
       break
@@ -100,7 +102,7 @@ const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
             weight="semibold"
             style={{ color: tokens.colorPaletteRedForeground1, marginRight: '4px' }}
           >
-            Error
+            {t('common.error')}
           </Text>
           {item.error && <Text size={200}>{item.error}</Text>}
         </>
@@ -110,13 +112,13 @@ const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
           icon={<DeleteRegular />}
           appearance="subtle"
           onClick={() => removeFromQueue(item.packageName)}
-          aria-label="Remove from queue"
+          aria-label={t('uploads.removeFromQueue')}
         />
       )
       break
 
     case 'Cancelled':
-      statusElement = <Text>Cancelled</Text>
+      statusElement = <Text>{t('downloads.cancelled')}</Text>
       actions = (
         <>
           <Button
@@ -161,24 +163,25 @@ const UploadRow: React.FC<{ item: UploadItem }> = ({ item }) => {
 const UploadsView: React.FC = () => {
   const styles = useStyles()
   const { queue } = useUpload()
+  const { t } = useTranslation()
 
   return (
     <div className={styles.wrapper}>
       {queue.length === 0 ? (
         <div className={styles.emptyState}>
           <Text size={200} weight="semibold">
-            No uploads in queue
+            {t('uploads.empty')}
           </Text>
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Game</TableHeaderCell>
-              <TableHeaderCell>Package Name</TableHeaderCell>
-              <TableHeaderCell>Version</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell>Actions</TableHeaderCell>
+              <TableHeaderCell>{t('uploads.game')}</TableHeaderCell>
+              <TableHeaderCell>{t('uploads.packageName')}</TableHeaderCell>
+              <TableHeaderCell>{t('uploads.version')}</TableHeaderCell>
+              <TableHeaderCell>{t('uploads.status')}</TableHeaderCell>
+              <TableHeaderCell>{t('uploads.actions')}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>

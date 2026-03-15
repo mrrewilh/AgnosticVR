@@ -23,6 +23,7 @@ import { formatDistanceToNow } from 'date-fns'
 import placeholderImage from '../assets/images/game-placeholder.png'
 import { useGames } from '@renderer/hooks/useGames'
 import { useGameDialog } from '@renderer/hooks/useGameDialog'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   root: {
@@ -92,6 +93,7 @@ interface DownloadsViewProps {
 
 const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
   const styles = useStyles()
+  const { t } = useTranslation()
   const { queue, isLoading, error, removeFromQueue, cancelDownload, retryDownload } = useDownload()
   const { selectedDevice, isConnected, loadPackages } = useAdb()
   const { games } = useGames()
@@ -155,15 +157,15 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
   }
 
   if (isLoading) {
-    return <div className={styles.root}>Loading download queue...</div>
+    return <div className={styles.root}>{t('downloads.loading')}</div>
   }
 
   if (error) {
     return (
       <div className={styles.root}>
-        <Title2>Downloads</Title2>
+        <Title2>{t('downloads.title')}</Title2>
         <Text style={{ color: tokens.colorPaletteRedForeground1 }}>
-          Error loading queue: {error}
+          {t('downloads.errorLoading')} {error}
         </Text>
       </div>
     )
@@ -172,9 +174,10 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
   return (
     <div className={styles.root}>
       {queue.length === 0 ? (
-        <Text>Download queue is empty.</Text>
+        <Text>{t('downloads.empty')}</Text>
       ) : (
         <div>
+          <Title2>{t('downloads.title')}</Title2>
           {queue
             .sort((a, b) => b.addedDate - a.addedDate)
             .map((item) => (
@@ -211,7 +214,7 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                         size="small"
                         className={styles.installedBadge}
                       >
-                        Installed
+                        {t('gameDetails.installed')}
                       </Badge>
                     )}
                   </div>
@@ -219,7 +222,7 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                     {item.releaseName}
                   </Text>
                   <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                    Added: {formatAddedTime(item.addedDate)}
+                    {t('downloads.added')} {formatAddedTime(item.addedDate)}
                   </Text>
                 </div>
                 {/* Progress / Status */}
@@ -230,13 +233,13 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                       <Text className={styles.statusText}>{item.progress}%</Text>
                       {item.speed && (
                         <Text size={200} className={styles.statusText}>
-                          Speed: {item.speed}
+                          {t('downloads.speed')} {item.speed}
                         </Text>
                       )}
                       {item.eta &&
                         item.eta !== '-' && ( // Don't show ETA if it's just '-'
                           <Text size={200} className={styles.statusText}>
-                            ETA: {item.eta}
+                            {t('downloads.eta')} {item.eta}
                           </Text>
                         )}
                     </>
@@ -249,23 +252,27 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                         className={styles.progressBar}
                       />
                       <Text className={styles.statusText}>
-                        Extracting... {item.extractProgress || 0}%
+                        {t('downloads.extracting')} {item.extractProgress || 0}%
                       </Text>
                     </>
                   )}
                   {item.status === 'Installing' && (
-                    <Text className={styles.statusText}>Installing...</Text>
+                    <Text className={styles.statusText}>{t('downloads.installing')}</Text>
                   )}
-                  {item.status === 'Queued' && <Text className={styles.statusText}>Queued</Text>}
+                  {item.status === 'Queued' && (
+                    <Text className={styles.statusText}>{t('games.queued')}</Text>
+                  )}
                   {item.status === 'Completed' && (
-                    <Text style={{ color: tokens.colorPaletteGreenForeground1 }}>Completed</Text>
+                    <Text style={{ color: tokens.colorPaletteGreenForeground1 }}>
+                      {t('downloads.completed')}
+                    </Text>
                   )}
                   {item.status === 'Cancelled' && (
-                    <Text className={styles.statusText}>Cancelled</Text>
+                    <Text className={styles.statusText}>{t('downloads.cancelled')}</Text>
                   )}
                   {item.status === 'Error' && (
                     <>
-                      <Text className={styles.errorText}>Error</Text>
+                      <Text className={styles.errorText}>{t('common.error')}</Text>
                       {item.error && (
                         <Text size={200} className={styles.errorText} title={item.error}>
                           {item.error.substring(0, 30)}...
@@ -275,7 +282,7 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                   )}
                   {item.status === 'InstallError' && (
                     <>
-                      <Text className={styles.errorText}>Install Error</Text>
+                      <Text className={styles.errorText}>{t('downloads.installError')}</Text>
                       {item.error && (
                         <Text size={200} className={styles.errorText} title={item.error}>
                           {item.error.substring(0, 30)}...
@@ -288,34 +295,36 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                   {item.status === 'Completed' && !isInstalled(item.releaseName) && (
                     <Button
                       icon={<DownloadInstallIcon />}
-                      aria-label="Install game"
+                      aria-label={t('downloads.installGame')}
                       size="small"
                       appearance="primary"
                       onClick={() => handleInstallFromCompleted(item.releaseName)}
                       disabled={!isConnected || !selectedDevice}
                       title={
-                        !isConnected || !selectedDevice ? 'Connect a device to install' : 'Install'
+                        !isConnected || !selectedDevice
+                          ? t('downloads.connectToInstall')
+                          : t('common.install')
                       }
                     >
-                      Install
+                      {t('common.install')}
                     </Button>
                   )}
 
                   {item.status === 'Completed' && isInstalled(item.releaseName) && (
                     <Button
                       icon={<UninstallIcon />}
-                      aria-label="Uninstall game"
+                      aria-label={t('downloads.uninstallGame')}
                       size="small"
                       appearance="outline"
                       onClick={() => handleUninstall(item)}
                       disabled={!isConnected || !selectedDevice}
                       title={
                         !isConnected || !selectedDevice
-                          ? 'Connect a device to uninstall'
-                          : 'Uninstall'
+                          ? t('downloads.connectToUninstall')
+                          : t('common.uninstall')
                       }
                     >
-                      Uninstall
+                      {t('common.uninstall')}
                     </Button>
                   )}
                 </div>
@@ -328,11 +337,11 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                     item.status === 'Installing') && (
                     <Button
                       icon={<CloseIcon />}
-                      aria-label="Cancel"
+                      aria-label={t('common.cancel')}
                       size="small"
                       appearance="subtle"
                       onClick={() => cancelDownload(item.releaseName)}
-                      title="Cancel"
+                      title={t('common.cancel')}
                     />
                   )}
 
@@ -342,11 +351,11 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                     item.status === 'InstallError') && (
                     <Button
                       icon={<RetryIcon />}
-                      aria-label="Retry download"
+                      aria-label={t('downloads.retryDownload')}
                       size="small"
                       appearance="subtle"
                       onClick={() => retryDownload(item.releaseName)}
-                      title="Retry"
+                      title={t('common.retry')}
                     />
                   )}
 
@@ -358,11 +367,11 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({ onClose }) => {
                     item.status === 'Queued') && (
                     <Button
                       icon={<DeleteRegular />}
-                      aria-label="Remove from list and delete files"
+                      aria-label={t('downloads.removeFromList')}
                       size="small"
                       appearance="subtle"
                       onClick={async () => await removeFromQueue(item.releaseName)}
-                      title="Remove from list and delete files"
+                      title={t('downloads.removeFromList')}
                     />
                   )}
                 </div>

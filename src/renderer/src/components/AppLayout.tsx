@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { AdbProvider } from '../context/AdbProvider'
 import { GamesProvider } from '../context/GamesProvider'
 import DeviceList from './DeviceList'
@@ -8,37 +8,28 @@ import UploadsView from './UploadsView'
 import Settings from './Settings'
 import { UpdateNotification } from './UpdateNotification'
 import UploadGamesDialog from './UploadGamesDialog'
+import Sidebar, { NavItem } from './Sidebar'
+import CommandPalette, { CommandAction } from './CommandPalette'
 import {
   FluentProvider,
-  Title1,
   makeStyles,
   tokens,
   Spinner,
   Text,
   teamsDarkTheme,
   teamsLightTheme,
-  Switch,
   Button,
   Drawer,
   DrawerHeader,
   DrawerHeaderTitle,
-  DrawerBody,
-  TabList,
-  Tab
+  DrawerBody
 } from '@fluentui/react-components'
-import electronLogo from '../assets/icon.svg'
 import { useDependency } from '../hooks/useDependency'
 import { DependencyProvider } from '../context/DependencyProvider'
 import { DownloadProvider } from '../context/DownloadProvider'
 import { SettingsProvider } from '../context/SettingsProvider'
 import { useDownload } from '../hooks/useDownload'
-import {
-  ArrowDownloadRegular as DownloadIcon,
-  DismissRegular as CloseIcon,
-  DesktopRegular,
-  SettingsRegular,
-  ArrowUploadRegular as UploadIcon
-} from '@fluentui/react-icons'
+import { DismissRegular as CloseIcon } from '@fluentui/react-icons'
 import { UploadProvider } from '@renderer/context/UploadProvider'
 import { useUpload } from '@renderer/hooks/useUpload'
 import { GameDialogProvider } from '@renderer/context/GameDialogProvider'
@@ -49,15 +40,34 @@ enum AppView {
   GAMES
 }
 
-// Type for app tab navigation
 type ActiveTab = 'games' | 'settings'
 
 const useStyles = makeStyles({
   root: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     height: '100vh',
     overflow: 'hidden'
+  },
+  sidebarCollapsed: {
+    width: '60px'
+  },
+  mainArea: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
+  },
+  compactHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: `${tokens.spacingVerticalNone} ${tokens.spacingHorizontalL}`,
+    borderBottom: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke1}`,
+    backgroundColor: tokens.colorNeutralBackground3,
+    gap: tokens.spacingHorizontalM,
+    justifyContent: 'space-between',
+    height: '60px',
+    flexShrink: 0
   },
   header: {
     display: 'flex',
@@ -67,11 +77,11 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground3,
     gap: tokens.spacingHorizontalM,
     justifyContent: 'space-between',
-    height: '90px', // Fixed header height
+    height: '90px',
     flexShrink: 0
   },
   logo: {
-    height: '48px'
+    height: '32px'
   },
   headerContent: {
     display: 'flex',
@@ -82,8 +92,8 @@ const useStyles = makeStyles({
     flexGrow: 1,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
-    height: 'calc(100vh - 90px)', // Remaining height after header
+    overflow: 'auto',
+    height: 'calc(100vh - 60px)',
     position: 'relative'
   },
   loadingOrErrorContainer: {
@@ -102,6 +112,10 @@ const useStyles = makeStyles({
   tabs: {
     marginLeft: tokens.spacingHorizontalM,
     marginRight: tokens.spacingHorizontalM
+  },
+  searchButton: {
+    minWidth: '200px',
+    justifyContent: 'flex-start'
   }
 })
 
@@ -250,6 +264,8 @@ const MainContent: React.FC<MainContentProps> = ({
 const AppLayout: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DEVICE_LIST)
   const [activeTab, setActiveTab] = useState<ActiveTab>('games')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const { colorScheme, setColorScheme } = useSettings()
   const [isDownloadsOpen, setIsDownloadsOpen] = useState(false)
   const [isUploadsOpen, setIsUploadsOpen] = useState(false)
@@ -257,6 +273,74 @@ const AppLayout: React.FC = () => {
   const styles = useStyles()
   const { queue: downloadQueue } = useDownload()
   const { queue: uploadQueue } = useUpload()
+
+  const activeNavItem = useMemo((): NavItem => {
+    if (currentView === AppView.DEVICE_LIST) return 'devices'
+    if (activeTab === 'settings') return 'settings'
+    return 'games'
+  }, [currentView, activeTab])
+
+  const handleNavClick = useCallback((item: NavItem) => {
+    if (item === 'devices') {
+      setCurrentView(AppView.DEVICE_LIST)
+    } else if (item === 'settings') {
+      setCurrentView(AppView.GAMES)
+      setActiveTab('settings')
+    } else if (item === 'games') {
+      setCurrentView(AppView.GAMES)
+      setActiveTab('games')
+    } else if (item === 'downloads') {
+      setIsDownloadsOpen(true)
+    } else if (item === 'uploads') {
+      setIsUploadsOpen(true)
+    }
+  }, [])
+
+  const handleCommandExecute = useCallback(
+    (command: CommandAction) => {
+      switch (command) {
+        case 'navigate-games':
+          setCurrentView(AppView.GAMES)
+          setActiveTab('games')
+          break
+        case 'navigate-devices':
+          setCurrentView(AppView.DEVICE_LIST)
+          break
+        case 'navigate-downloads':
+          setIsDownloadsOpen(true)
+          break
+        case 'navigate-uploads':
+          setIsUploadsOpen(true)
+          break
+        case 'navigate-settings':
+          setCurrentView(AppView.GAMES)
+          setActiveTab('settings')
+          break
+        case 'toggle-dark-mode':
+          setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')
+          break
+        case 'toggle-sidebar':
+          setSidebarCollapsed(!sidebarCollapsed)
+          break
+      }
+    },
+    [colorScheme, sidebarCollapsed, setColorScheme]
+  )
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen(true)
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault()
+        setSidebarCollapsed(!sidebarCollapsed)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [sidebarCollapsed])
 
   const handleDeviceConnected = (): void => {
     setCurrentView(AppView.GAMES)
@@ -269,6 +353,22 @@ const AppLayout: React.FC = () => {
   const handleBackToDeviceList = (): void => {
     setCurrentView(AppView.DEVICE_LIST)
   }
+
+  const downloadProgress = useMemo(() => {
+    const activeDownloads = downloadQueue.filter((item) => item.status === 'Downloading')
+    if (activeDownloads.length > 0) {
+      return activeDownloads[0].progress
+    }
+    return 0
+  }, [downloadQueue])
+
+  const uploadProgress = useMemo(() => {
+    const activeUploads = uploadQueue.filter((item) => item.status === 'Uploading')
+    if (activeUploads.length > 0) {
+      return activeUploads[0].progress
+    }
+    return 0
+  }, [uploadQueue])
 
   useEffect(() => {
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -283,128 +383,11 @@ const AppLayout: React.FC = () => {
     }
   }, [setColorScheme])
 
+  useEffect(() => {
+    document.body.setAttribute('data-theme', colorScheme)
+  }, [colorScheme])
+
   const currentTheme = colorScheme === 'dark' ? teamsDarkTheme : teamsLightTheme
-
-  const handleThemeChange = (_ev, data: { checked: boolean }): void => {
-    setColorScheme(data.checked ? 'dark' : 'light')
-  }
-
-  const downloadQueueProgress = useMemo(() => {
-    const activeDownloads = downloadQueue.filter((item) => item.status === 'Downloading')
-    const extractingDownloads = downloadQueue.filter((item) => item.status === 'Extracting')
-    const installingDownloads = downloadQueue.filter((item) => item.status === 'Installing')
-    const queuedDownloads = downloadQueue.filter((item) => item.status === 'Queued')
-    return {
-      activeDownloads,
-      extractingDownloads,
-      installingDownloads,
-      queuedDownloads
-    }
-  }, [downloadQueue])
-
-  const uploadQueueProgress = useMemo(() => {
-    const preparingUploads = uploadQueue.filter((item) => item.status === 'Preparing')
-    const activeUploads = uploadQueue.filter((item) => item.status === 'Uploading')
-    const queuedUploads = uploadQueue.filter((item) => item.status === 'Queued')
-    return {
-      preparingUploads,
-      activeUploads,
-      queuedUploads
-    }
-  }, [uploadQueue])
-
-  const getDownloadButtonContent = (): { icon: React.ReactNode; text: string } => {
-    const { activeDownloads, extractingDownloads, installingDownloads, queuedDownloads } =
-      downloadQueueProgress
-
-    if (activeDownloads.length > 0) {
-      const activeDownload = activeDownloads[0]
-      const activeDownloadName = activeDownload.gameName
-      const activeDownloadProgress = activeDownload.progress
-      const activeDownloadEta = activeDownload.eta || ''
-      const activeDownloadSpeed = activeDownload.speed || ''
-      let text = `${activeDownloadName} (${activeDownloadProgress}%) ${activeDownloadEta} ${activeDownloadSpeed}`
-      if (queuedDownloads.length > 0) {
-        text += ` (+${queuedDownloads.length})`
-      }
-      return {
-        icon: <Spinner size="tiny" style={{ animationDuration: '1s' }} />,
-        text
-      }
-    } else if (extractingDownloads.length > 0) {
-      const extractingDownload = extractingDownloads[0]
-      const extractingDownloadName = extractingDownload.gameName
-      const extractingDownloadProgress = extractingDownload.extractProgress || 0
-      let text = `Extracting ${extractingDownloadName} (${extractingDownloadProgress}%)...`
-      if (queuedDownloads.length > 0) {
-        text += ` (+${queuedDownloads.length})`
-      }
-      return {
-        icon: <Spinner size="tiny" style={{ animationDuration: '1s' }} />,
-        text
-      }
-    } else if (installingDownloads.length > 0) {
-      const installingDownload = installingDownloads[0]
-      const installingDownloadName = installingDownload.gameName
-      let text = `Installing ${installingDownloadName}...`
-      if (queuedDownloads.length > 0) {
-        text += ` (+${queuedDownloads.length})`
-      }
-      return {
-        icon: <Spinner size="tiny" style={{ animationDuration: '1s' }} />,
-        text
-      }
-    } else {
-      return {
-        icon: <DownloadIcon />,
-        text: 'Downloads'
-      }
-    }
-  }
-
-  const getUploadButtonContent = (): { icon: React.ReactNode; text: string } => {
-    const { preparingUploads, activeUploads, queuedUploads } = uploadQueueProgress
-
-    if (activeUploads.length > 0) {
-      const activeUpload = activeUploads[0]
-      const activeUploadName = activeUpload.gameName
-      const activeUploadProgress = activeUpload.progress
-      let text = `Uploading ${activeUploadName} (${activeUploadProgress}%)`
-      if (queuedUploads.length > 0) {
-        text += ` (+${queuedUploads.length})`
-      }
-      return {
-        icon: <Spinner size="tiny" style={{ animationDuration: '1s' }} />,
-        text
-      }
-    } else if (preparingUploads.length > 0) {
-      const preparingUpload = preparingUploads[0]
-      const preparingUploadName = preparingUpload.gameName
-      const preparingUploadProgress = preparingUpload.progress
-      const preparingUploadStage = preparingUpload.stage || 'Preparing'
-      let text = `${preparingUploadStage} ${preparingUploadName} (${preparingUploadProgress}%)`
-      if (queuedUploads.length > 0) {
-        text += ` (+${queuedUploads.length})`
-      }
-      return {
-        icon: <Spinner size="tiny" style={{ animationDuration: '1s' }} />,
-        text
-      }
-    } else if (queuedUploads.length > 0) {
-      return {
-        icon: <UploadIcon />,
-        text: `Uploads (${queuedUploads.length})`
-      }
-    } else {
-      return {
-        icon: <UploadIcon />,
-        text: 'Uploads'
-      }
-    }
-  }
-
-  const { icon: downloadButtonIcon, text: downloadButtonText } = getDownloadButtonContent()
-  const { icon: uploadButtonIcon, text: uploadButtonText } = getUploadButtonContent()
 
   return (
     <FluentProvider theme={currentTheme}>
@@ -412,74 +395,34 @@ const AppLayout: React.FC = () => {
         <GamesProvider>
           <GameDialogProvider>
             <div className={styles.root}>
-              <div className={styles.header}>
-                <div className={styles.headerContent}>
-                  <img alt="logo" className={styles.logo} src={electronLogo} />
-                  <Title1>MythicQuestVR</Title1>
-                </div>
-                <div className={styles.headerActions}>
-                  {currentView !== AppView.DEVICE_LIST && (
-                    <>
-                      <Button
-                        onClick={() => {
-                          console.log('[AppLayout] Downloads button clicked')
-                          setIsDownloadsOpen(true)
-                        }}
-                        icon={downloadButtonIcon}
-                        style={{
-                          fontFamily: 'monospace',
-                          fontSize: '12px'
-                        }}
-                      >
-                        {downloadButtonText}
-                      </Button>
+              <Sidebar
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                activeItem={activeNavItem}
+                onNavigate={handleNavClick}
+                deviceConnected={currentView === AppView.GAMES}
+                downloadProgress={downloadProgress}
+                uploadProgress={uploadProgress}
+              />
 
-                      <Button
-                        onClick={() => {
-                          console.log('[AppLayout] Uploads button clicked')
-                          setIsUploadsOpen(true)
-                        }}
-                        icon={uploadButtonIcon}
-                        style={{
-                          fontFamily: 'monospace',
-                          fontSize: '12px'
-                        }}
-                      >
-                        {uploadButtonText}
-                      </Button>
-
-                      <TabList
-                        selectedValue={activeTab}
-                        onTabSelect={(_, data) => setActiveTab(data.value as ActiveTab)}
-                        appearance="subtle"
-                        className={styles.tabs}
-                      >
-                        <Tab value="games" icon={<DesktopRegular />}>
-                          Games
-                        </Tab>
-                        <Tab value="settings" icon={<SettingsRegular />}>
-                          Settings
-                        </Tab>
-                      </TabList>
-                    </>
-                  )}
-                  <Switch
-                    label={colorScheme === 'dark' ? 'Dark mode' : 'Light mode'}
-                    checked={colorScheme === 'dark'}
-                    onChange={handleThemeChange}
+              <div className={styles.mainArea}>
+                <div className={styles.mainContent} id="mainContent">
+                  <MainContent
+                    currentView={currentView}
+                    activeTab={activeTab}
+                    onDeviceConnected={handleDeviceConnected}
+                    onSkipConnection={handleSkipConnection}
+                    onBackToDeviceList={handleBackToDeviceList}
                   />
                 </div>
               </div>
 
-              <div className={styles.mainContent} id="mainContent">
-                <MainContent
-                  currentView={currentView}
-                  activeTab={activeTab}
-                  onDeviceConnected={handleDeviceConnected}
-                  onSkipConnection={handleSkipConnection}
-                  onBackToDeviceList={handleBackToDeviceList}
-                />
-              </div>
+              <CommandPalette
+                open={commandPaletteOpen}
+                onClose={() => setCommandPaletteOpen(false)}
+                onExecute={handleCommandExecute}
+                darkMode={colorScheme === 'dark'}
+              />
 
               {/* Add UpdateNotification component here - it manages its own visibility */}
               <UpdateNotification />

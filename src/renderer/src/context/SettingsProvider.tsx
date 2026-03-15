@@ -1,19 +1,44 @@
-import React, { ReactNode, useEffect, useState, useCallback } from 'react'
-import { SettingsContext, SettingsContextType } from './SettingsContext'
+import React, { ReactNode, useEffect, useState, useCallback, useMemo } from 'react'
+import { SettingsContext, SettingsContextType, Language, ColorScheme } from './SettingsContext'
 
 interface SettingsProviderProps {
   children: ReactNode
+}
+
+const getSystemColorScheme = (): 'light' | 'dark' => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return 'light'
 }
 
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
   const [downloadPath, setDownloadPathState] = useState<string>('')
   const [downloadSpeedLimit, setDownloadSpeedLimitState] = useState<number>(0)
   const [uploadSpeedLimit, setUploadSpeedLimitState] = useState<number>(0)
-  const [colorScheme, setColorSchemeState] = useState<'light' | 'dark'>(
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  )
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('auto')
+  const [language, setLanguageState] = useState<Language>('en')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+
+  const resolvedColorScheme = useMemo((): 'light' | 'dark' => {
+    if (colorScheme === 'auto') {
+      return getSystemColorScheme()
+    }
+    return colorScheme
+  }, [colorScheme])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = () => {
+      if (colorScheme === 'auto') {
+        // Force re-render when system theme changes in auto mode
+        setColorSchemeState('auto')
+      }
+    }
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [colorScheme])
 
   // Load initial settings when component mounts
   useEffect(() => {
@@ -21,21 +46,24 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
 
     const loadSettings = async (): Promise<void> => {
       try {
-        const [path, downloadLimit, uploadLimit, colorScheme] = await Promise.all([
+        const [path, downloadLimit, uploadLimit, colorScheme, language] = await Promise.all([
           window.api.settings.getDownloadPath(),
           window.api.settings.getDownloadSpeedLimit(),
           window.api.settings.getUploadSpeedLimit(),
-          window.api.settings.getColorScheme()
+          window.api.settings.getColorScheme(),
+          window.api.settings.getLanguage()
         ])
 
         if (isMounted) {
           console.log('Fetched initial download path:', path)
           console.log('Fetched initial download speed limit:', downloadLimit)
           console.log('Fetched initial upload speed limit:', uploadLimit)
+          console.log('Fetched initial language:', language)
           setDownloadPathState(path)
           setDownloadSpeedLimitState(downloadLimit)
           setUploadSpeedLimitState(uploadLimit)
-          setColorSchemeState(colorScheme)
+          setColorSchemeState(colorScheme as ColorScheme)
+          setLanguageState(language)
         }
       } catch (err) {
         console.error('Error fetching settings:', err)
@@ -104,7 +132,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     }
   }, [])
 
-  const setColorScheme = useCallback(async (scheme: 'light' | 'dark'): Promise<void> => {
+  const setColorScheme = useCallback(async (scheme: ColorScheme): Promise<void> => {
     try {
       setIsLoading(true)
       await window.api.settings.setColorScheme(scheme)
@@ -119,17 +147,35 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     }
   }, [])
 
+  const setLanguage = useCallback(async (lang: Language): Promise<void> => {
+    try {
+      setIsLoading(true)
+      await window.api.settings.setLanguage(lang)
+      setLanguageState(lang)
+      setError(null)
+    } catch (err) {
+      console.error('Error setting language:', err)
+      setError('Failed to update language')
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   const value: SettingsContextType = {
     downloadPath,
     downloadSpeedLimit,
     uploadSpeedLimit,
     colorScheme,
+    resolvedColorScheme,
+    language,
     isLoading,
     error,
     setDownloadPath,
     setDownloadSpeedLimit,
     setUploadSpeedLimit,
-    setColorScheme
+    setColorScheme,
+    setLanguage
   }
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>

@@ -5,14 +5,11 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   ColumnDef,
-  flexRender,
   SortingState,
   FilterFn,
   ColumnFiltersState,
-  Row,
   ColumnSizingState
 } from '@tanstack/react-table'
-import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAdb } from '../hooks/useAdb'
 import { useGames } from '../hooks/useGames'
 import { useDownload } from '../hooks/useDownload'
@@ -54,12 +51,16 @@ import {
   FolderAddRegular,
   DocumentRegular,
   ChevronDownRegular,
-  CopyRegular
+  CopyRegular,
+  AppsRegular,
+  ListRegular,
+  TableRegular
 } from '@fluentui/react-icons'
 import { ArrowLeftRegular } from '@fluentui/react-icons'
 import GameDetailsDialog from './GameDetailsDialog'
 import { useGameDialog } from '@renderer/hooks/useGameDialog'
 import MirrorSelector from './MirrorSelector'
+import GamesViewContent from './GamesViewContent'
 
 // Column width constants
 const COLUMN_WIDTHS = {
@@ -281,6 +282,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
   const [installSuccess, setInstallSuccess] = useState<boolean | null>(null)
   const [showObbConfirmDialog, setShowObbConfirmDialog] = useState<boolean>(false)
   const [obbFolderToConfirm, setObbFolderToConfirm] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('table')
 
   const counts = useMemo(() => {
     const total = games.length
@@ -342,6 +344,25 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
     })
     return map
   }, [downloadQueue])
+
+  const filteredGames = useMemo(() => {
+    let result = games
+    if (globalFilter) {
+      const searchStr = globalFilter.toLowerCase()
+      result = result.filter(
+        (g) =>
+          g.name?.toLowerCase().includes(searchStr) ||
+          g.packageName?.toLowerCase().includes(searchStr) ||
+          g.releaseName?.toLowerCase().includes(searchStr)
+      )
+    }
+    if (activeFilter === 'installed') {
+      result = result.filter((g) => g.isInstalled)
+    } else if (activeFilter === 'update') {
+      result = result.filter((g) => g.isInstalled && g.hasUpdate)
+    }
+    return result
+  }, [games, globalFilter, activeFilter])
 
   useEffect(() => {
     if (!tableContainerRef.current) return
@@ -610,14 +631,6 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
     getSortedRowModel: getSortedRowModel()
   })
 
-  const { rows } = table.getRowModel()
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 115,
-    overscan: 10
-  })
-
   const formatDate = (date: Date | null): string => {
     if (!date) return 'Never'
     return new Intl.DateTimeFormat('en-US', {
@@ -647,15 +660,6 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
       return extractProgress
     }
     return 0
-  }
-
-  const handleRowClick = (
-    _event: React.MouseEvent<HTMLTableRowElement>,
-    row: Row<GameInfo>
-  ): void => {
-    console.log('Row clicked for game:', row.original.name)
-    setDialogGame(row.original)
-    setIsDialogOpen(true)
   }
 
   useEffect(() => {
@@ -1310,6 +1314,29 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
         </div>
         <div className="games-toolbar-right">
           <span className="game-count">{table.getFilteredRowModel().rows.length} displayed</span>
+          <div className="view-mode-toggle" style={{ display: 'flex', gap: '4px' }}>
+            <Button
+              size="small"
+              appearance={viewMode === 'grid' ? 'primary' : 'subtle'}
+              icon={<AppsRegular />}
+              onClick={() => setViewMode('grid')}
+              title="Grid view"
+            />
+            <Button
+              size="small"
+              appearance={viewMode === 'list' ? 'primary' : 'subtle'}
+              icon={<ListRegular />}
+              onClick={() => setViewMode('list')}
+              title="List view"
+            />
+            <Button
+              size="small"
+              appearance={viewMode === 'table' ? 'primary' : 'subtle'}
+              icon={<TableRegular />}
+              onClick={() => setViewMode('table')}
+              title="Table view"
+            />
+          </div>
           <Input
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(String(e.target.value))}
@@ -1342,95 +1369,32 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
           </div>
         ) : (
           <>
-            <div className="table-wrapper" ref={tableContainerRef}>
-              <table className="games-table" style={{ width: table.getTotalSize() }}>
-                <thead
-                  style={{
-                    display: 'grid',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1
-                  }}
-                >
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          colSpan={header.colSpan}
-                          style={{ width: header.getSize(), position: 'relative' }}
-                        >
-                          {header.isPlaceholder ? null : (
-                            <div
-                              {...{
-                                className: header.column.getCanSort()
-                                  ? 'cursor-pointer select-none'
-                                  : '',
-                                onClick: header.column.getToggleSortingHandler()
-                              }}
-                            >
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                              {{
-                                asc: ' 🔼',
-                                desc: ' 🔽'
-                              }[header.column.getIsSorted() as string] ?? null}
-                            </div>
-                          )}
-                          {header.column.getCanResize() && (
-                            <div
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
-                              className={`${styles.resizer} ${header.column.getIsResizing() ? styles.isResizing : ''}`}
-                            />
-                          )}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody
-                  style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
-                >
-                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                    const row = rows[virtualRow.index] as Row<GameInfo>
-                    const rowClasses = [
-                      row.original.isInstalled ? 'row-installed' : 'row-not-installed',
-                      row.original.hasUpdate ? 'row-update-available' : ''
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-
-                    return (
-                      <tr
-                        key={row.id}
-                        className={rowClasses}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: `${virtualRow.size}px`,
-                          transform: `translateY(${virtualRow.start}px)`
-                        }}
-                        onClick={(e) => handleRowClick(e, row)}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            style={{
-                              width: cell.column.getSize(),
-                              maxWidth: cell.column.getSize()
-                            }}
-                          >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
-                        ))}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <GamesViewContent
+              filteredGames={filteredGames}
+              downloadStatusMap={downloadStatusMap}
+              tableWidth={tableWidth}
+              tableContainerRef={tableContainerRef}
+              columnSizing={columnSizing}
+              setColumnSizing={setColumnSizing}
+              globalFilter={globalFilter}
+              setGlobalFilter={setGlobalFilter}
+              isConnected={isConnected}
+              isBusy={isBusy}
+              onGameClick={(game) => {
+                setDialogGame(game)
+                setIsDialogOpen(true)
+              }}
+              onInstall={handleInstall}
+              onUninstall={handleUninstall}
+              onReinstall={handleReinstall}
+              onUpdate={handleUpdate}
+              onRetry={handleRetry}
+              onCancelDownload={handleCancelDownload}
+              onDeleteDownloaded={handleDeleteDownloaded}
+              onInstallFromCompleted={handleInstallFromCompleted}
+              getNote={getNote}
+              viewMode={viewMode}
+            />
 
             {dialogGame && (
               <GameDetailsDialog

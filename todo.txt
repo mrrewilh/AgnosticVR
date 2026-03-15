@@ -1,7 +1,0 @@
-January 2026
-- Fix YouTube player for trailers (Done!)
-- Add support for RPM based distributions (Done!)
-- Update to Fluent UI v10
-- Update to latest electron (Done!)
-- Build artifacts with github actions to create releases (Testing)
-- Change branding to MythicQuestVR (Done!)

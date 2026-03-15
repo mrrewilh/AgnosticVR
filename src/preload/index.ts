@@ -199,10 +199,13 @@ const api = {
       typedIpcRenderer.invoke('settings:get-upload-speed-limit'),
     setUploadSpeedLimit: (limit: number): Promise<void> =>
       typedIpcRenderer.invoke('settings:set-upload-speed-limit', limit),
-    getColorScheme: (): Promise<'light' | 'dark'> =>
+    getColorScheme: (): Promise<'light' | 'dark' | 'auto'> =>
       typedIpcRenderer.invoke('settings:get-color-scheme'),
-    setColorScheme: (scheme: 'light' | 'dark'): Promise<void> =>
-      typedIpcRenderer.invoke('settings:set-color-scheme', scheme)
+    setColorScheme: (scheme: 'light' | 'dark' | 'auto'): Promise<void> =>
+      typedIpcRenderer.invoke('settings:set-color-scheme', scheme),
+    getLanguage: (): Promise<'en' | 'tr'> => typedIpcRenderer.invoke('settings:get-language'),
+    setLanguage: (lang: 'en' | 'tr'): Promise<void> =>
+      typedIpcRenderer.invoke('settings:set-language', lang)
   } satisfies SettingsAPIRenderer,
   // Logs APIs
   logs: {

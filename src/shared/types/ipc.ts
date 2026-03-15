@@ -88,8 +88,10 @@ export interface IPCChannels {
   'settings:set-download-speed-limit': DefineChannel<[limit: number], void>
   'settings:get-upload-speed-limit': DefineChannel<[], number>
   'settings:set-upload-speed-limit': DefineChannel<[limit: number], void>
-  'settings:get-color-scheme': DefineChannel<[], 'light' | 'dark'>
-  'settings:set-color-scheme': DefineChannel<[scheme: 'light' | 'dark'], void>
+  'settings:get-color-scheme': DefineChannel<[], 'light' | 'dark' | 'auto'>
+  'settings:set-color-scheme': DefineChannel<[scheme: 'light' | 'dark' | 'auto'], void>
+  'settings:get-language': DefineChannel<[], 'en' | 'tr'>
+  'settings:set-language': DefineChannel<[lang: 'en' | 'tr'], void>
 
   // Log upload related channels
   'logs:upload-current': DefineChannel<[], { url: string; password: string } | null>

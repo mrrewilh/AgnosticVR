@@ -442,6 +442,9 @@ app.whenReady().then(async () => {
     settingsService.setColorScheme(scheme)
   )
 
+  typedIpcMain.handle('settings:get-language', () => settingsService.getLanguage())
+  typedIpcMain.handle('settings:set-language', (_event, lang) => settingsService.setLanguage(lang))
+
   // --- Logs Handlers ---
   typedIpcMain.handle('logs:upload-current', async () => {
     console.log('[IPC] Log upload requested')

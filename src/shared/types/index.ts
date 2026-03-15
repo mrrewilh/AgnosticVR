@@ -242,13 +242,12 @@ export interface GamesAPI {
   isGameBlacklisted: (packageName: string, version?: number) => boolean
 }
 
-export interface GameAPIRenderer
-  extends Modify<
-    GamesAPI,
-    {
-      isGameBlacklisted: (packageName: string, version?: number) => Promise<boolean>
-    }
-  > {
+export interface GameAPIRenderer extends Modify<
+  GamesAPI,
+  {
+    isGameBlacklisted: (packageName: string, version?: number) => Promise<boolean>
+  }
+> {
   onDownloadProgress: (callback: (progress: DownloadProgress) => void) => () => void
 }
 
@@ -314,7 +313,8 @@ export interface Settings {
   downloadSpeedLimit: number
   uploadSpeedLimit: number
   hideAdultContent: boolean
-  colorScheme: 'light' | 'dark'
+  colorScheme: 'light' | 'dark' | 'auto'
+  language: 'en' | 'tr'
 }
 
 export interface SettingsAPI {
@@ -324,24 +324,27 @@ export interface SettingsAPI {
   setDownloadSpeedLimit: (limit: number) => void
   getUploadSpeedLimit: () => number
   setUploadSpeedLimit: (limit: number) => void
-  getColorScheme: () => 'light' | 'dark'
-  setColorScheme: (scheme: 'light' | 'dark') => void
+  getColorScheme: () => 'light' | 'dark' | 'auto'
+  setColorScheme: (scheme: 'light' | 'dark' | 'auto') => void
+  getLanguage: () => 'en' | 'tr'
+  setLanguage: (lang: 'en' | 'tr') => void
 }
 
-export interface SettingsAPIRenderer
-  extends Modify<
-    SettingsAPI,
-    {
-      getDownloadPath: () => Promise<string>
-      setDownloadPath: (path: string) => Promise<void>
-      getDownloadSpeedLimit: () => Promise<number>
-      setDownloadSpeedLimit: (limit: number) => Promise<void>
-      getUploadSpeedLimit: () => Promise<number>
-      setUploadSpeedLimit: (limit: number) => Promise<void>
-      getColorScheme: () => Promise<'light' | 'dark'>
-      setColorScheme: (scheme: 'light' | 'dark') => Promise<void>
-    }
-  > {}
+export interface SettingsAPIRenderer extends Modify<
+  SettingsAPI,
+  {
+    getDownloadPath: () => Promise<string>
+    setDownloadPath: (path: string) => Promise<void>
+    getDownloadSpeedLimit: () => Promise<number>
+    setDownloadSpeedLimit: (limit: number) => Promise<void>
+    getUploadSpeedLimit: () => Promise<number>
+    setUploadSpeedLimit: (limit: number) => Promise<void>
+    getColorScheme: () => Promise<'light' | 'dark' | 'auto'>
+    setColorScheme: (scheme: 'light' | 'dark' | 'auto') => Promise<void>
+    getLanguage: () => Promise<'en' | 'tr'>
+    setLanguage: (lang: 'en' | 'tr') => Promise<void>
+  }
+> {}
 
 // Logs API
 export interface LogsAPI {

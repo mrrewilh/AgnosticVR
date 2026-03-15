@@ -35,6 +35,7 @@ import {
 import placeholderImage from '../assets/images/game-placeholder.png'
 import YouTube from 'react-youtube'
 import { useGames } from '@renderer/hooks/useGames'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   dialogContentLayout: {
@@ -182,6 +183,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
   isBusy
 }) => {
   const styles = useStyles()
+  const { t } = useTranslation()
   const { getTrailerVideoId: getTrailerVideoIdFromContext } = useGames()
   const [currentGameNote, setCurrentGameNote] = useState<string | null>(null)
   const [loadingNote, setLoadingNote] = useState<boolean>(false)
@@ -204,7 +206,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
         } catch (err) {
           console.error(`Error fetching note for ${game.releaseName}:`, err)
           if (isMounted) {
-            setCurrentGameNote('Error loading note.')
+            setCurrentGameNote(t('errors.loadFailed'))
           }
         } finally {
           if (isMounted) {
@@ -268,7 +270,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
       return (
         <div className={styles.installingIndicator}>
           <Spinner size="small" />
-          <Text>Installing...</Text>
+          <Text>{t('gameDetails.installing')}</Text>
         </div>
       )
     }
@@ -281,7 +283,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
           onClick={() => onCancelDownload(currentGame)}
           disabled={isBusy}
         >
-          Cancel Download
+          {t('gameDetails.cancelDownload')}
         </Button>
       )
     }
@@ -295,7 +297,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
             onClick={() => onRetry(currentGame)}
             disabled={isBusy}
           >
-            Retry
+            {t('gameDetails.retry')}
           </Button>
           <Button
             appearance="danger"
@@ -303,7 +305,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
             onClick={() => onDeleteDownloaded(currentGame)}
             disabled={isBusy}
           >
-            Delete Downloaded Files
+            {t('gameDetails.deleteFiles')}
           </Button>
         </>
       )
@@ -319,7 +321,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               onClick={() => onUpdate(currentGame)}
               disabled={!isConnected || isBusy}
             >
-              Update
+              {t('common.update')}
             </Button>
             <Button
               appearance="danger"
@@ -327,7 +329,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               onClick={() => onUninstall(currentGame)}
               disabled={!isConnected || isBusy}
             >
-              Uninstall
+              {t('common.uninstall')}
             </Button>
           </>
         )
@@ -340,7 +342,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               onClick={() => onReinstall(currentGame)}
               disabled={!isConnected || isBusy}
             >
-              Reinstall
+              {t('gameDetails.reinstall')}
             </Button>
             <Button
               appearance="danger"
@@ -348,7 +350,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               onClick={() => onUninstall(currentGame)}
               disabled={!isConnected || isBusy}
             >
-              Uninstall
+              {t('common.uninstall')}
             </Button>
           </>
         )
@@ -364,7 +366,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
             onClick={() => onInstallFromCompleted(currentGame)}
             disabled={!isConnected || isBusy}
           >
-            Install
+            {t('gameDetails.install')}
           </Button>
           <Button
             appearance="danger"
@@ -372,7 +374,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
             onClick={() => onDeleteDownloaded(currentGame)}
             disabled={isBusy}
           >
-            Delete Downloaded Files
+            {t('gameDetails.deleteFiles')}
           </Button>
         </>
       )
@@ -385,7 +387,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
         onClick={() => onInstall(currentGame)}
         disabled={isBusy}
       >
-        {isConnected ? 'Install' : 'Download'}
+        {isConnected ? t('gameDetails.install') : t('gameDetails.download')}
       </Button>
     )
   }
@@ -466,16 +468,16 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
                         >
                           {(() => {
                             const status = downloadStatusMap.get(game.releaseName || '')?.status
-                            if (game.isInstalled) return 'Installed'
-                            if (status === 'Completed') return 'Downloaded'
-                            if (status === 'InstallError') return 'Install Error'
-                            if (status === 'Installing') return 'Installing'
-                            return 'Not Installed'
+                            if (game.isInstalled) return t('gameDetails.installed')
+                            if (status === 'Completed') return t('gameDetails.downloaded')
+                            if (status === 'InstallError') return t('downloads.installError')
+                            if (status === 'Installing') return t('gameDetails.installing')
+                            return t('gameDetails.notInstalled')
                           })()}
                         </Badge>
                         {game.hasUpdate && (
                           <Badge shape="rounded" color="brand" appearance="filled">
-                            Update Available
+                            {t('games.updateAvailable')}
                           </Badge>
                         )}
                       </div>
@@ -490,7 +492,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
                       <div className={styles.inlineInfo}>
                         <InfoRegular fontSize={16} />
                         <Text size={300}>
-                          {game.version ? `v${game.version}` : '-'}
+                          {game.version ? t('games.versionWithV', { version: game.version }) : '-'}
                           <span
                             style={{
                               color: tokens.colorNeutralForeground3,
@@ -500,7 +502,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
                           >
                             {game.isInstalled &&
                               game.deviceVersionCode &&
-                              ` (Device: v${game.deviceVersionCode})`}
+                              ` (${t('gameDetails.deviceVersion', { version: game.deviceVersionCode })})`}
                           </span>
                         </Text>
                       </div>
@@ -521,12 +523,12 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               </div>
               <Divider style={{ marginTop: tokens.spacingVerticalS }} />
               {loadingNote ? (
-                <Spinner size="tiny" label="Loading note..." />
+                <Spinner size="tiny" label={t('gameDetails.loadingNote')} />
               ) : (
                 currentGameNote && (
                   <div className={styles.noteSection}>
                     <Text weight="semibold" className={styles.noteTitle}>
-                      Note:
+                      {t('gameDetails.note')}
                     </Text>
                     <div className={styles.noteContent}>{currentGameNote}</div>
                   </div>
@@ -535,10 +537,10 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
               <div className={styles.trailerSection}>
                 <div className={styles.trailerTitle}>
                   <VideoRegular fontSize={16} />
-                  <Text weight="semibold">Trailer:</Text>
+                  <Text weight="semibold">{t('gameDetails.trailer')}</Text>
                 </div>
                 {loadingVideo ? (
-                  <Spinner size="tiny" label="Searching for trailer..." />
+                  <Spinner size="tiny" label={t('gameDetails.searchingTrailer')} />
                 ) : videoId ? (
                   <div className={styles.youtubeContainer}>
                     <YouTube
@@ -554,7 +556,7 @@ const GameDetailsDialog: React.FC<GameDetailsDialogProps> = ({
                     />
                   </div>
                 ) : (
-                  <Text>No trailer available.</Text>
+                  <Text>{t('gameDetails.noTrailer')}</Text>
                 )}
               </div>
 

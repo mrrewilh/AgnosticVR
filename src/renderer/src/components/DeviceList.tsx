@@ -32,6 +32,7 @@ import {
   DismissCircleRegular as DisconnectedCircleRegular,
   ClockRegular
 } from '@fluentui/react-icons'
+import { useTranslation } from '../hooks/useTranslation'
 
 interface DeviceListProps {
   onSkip?: () => void
@@ -132,6 +133,7 @@ const useStyles = makeStyles({
 })
 
 const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
+  const { t } = useTranslation()
   const {
     devices,
     selectedDevice,
@@ -181,14 +183,16 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
         // Check if the device ping status shows it's unreachable to provide better error message
         const currentDevice = devices.find((d) => d.id === serial)
         if (currentDevice?.pingStatus === 'unreachable') {
-          setConnectionError(`Device ${currentDevice.ipAddress || serial} is unreachable (offline)`)
+          setConnectionError(
+            t('deviceList.deviceUnreachable', { ip: currentDevice.ipAddress || serial })
+          )
         } else {
-          setConnectionError(`Failed to connect to device ${serial}`)
+          setConnectionError(t('deviceList.failedToConnect', { serial }))
         }
         setLastFailedDeviceId(serial)
       }
     } catch {
-      setConnectionError('Connection failed')
+      setConnectionError(t('deviceList.connectionToFailed', { address: serial }))
       setLastFailedDeviceId(serial)
     } finally {
       setConnectingDeviceId(null)
@@ -258,14 +262,16 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
         // Check if the device ping status shows it's unreachable to provide better error message
         const currentDevice = devices.find((d) => d.id === deviceId)
         if (currentDevice?.pingStatus === 'unreachable') {
-          setConnectionError(`Device ${bookmarkData.ipAddress} is unreachable (offline)`)
+          setConnectionError(t('deviceList.deviceUnreachable', { ip: bookmarkData.ipAddress }))
         } else {
-          setConnectionError(`Failed to connect to ${bookmarkData.ipAddress}:${bookmarkData.port}`)
+          setConnectionError(
+            `${t('deviceList.connectingFailed')}: ${bookmarkData.ipAddress}:${bookmarkData.port}`
+          )
         }
         setLastFailedDeviceId(deviceId)
       }
     } catch {
-      setConnectionError(`Connection to ${bookmarkData.ipAddress} failed`)
+      setConnectionError(t('deviceList.connectionToFailed', { address: bookmarkData.ipAddress }))
       setLastFailedDeviceId(deviceId)
     } finally {
       setConnectingDeviceId(null)
@@ -284,7 +290,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
   return (
     <Card className={styles.card}>
       <CardHeader
-        header={<Title3>Meta Quest Devices</Title3>}
+        header={<Title3>{t('deviceList.title')}</Title3>}
         action={
           <div className={styles.headerActions}>
             <Button
@@ -293,7 +299,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
               disabled={isLoading}
               appearance="subtle"
             >
-              {isLoading ? 'Loading...' : 'Refresh'}
+              {isLoading ? t('common.loading') : t('deviceList.refresh')}
             </Button>
             {onSkip && !isConnected && (
               <Button onClick={onSkip} appearance="secondary">
@@ -302,7 +308,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
             )}
             {onSkip && isConnected && (
               <Button onClick={onSkip} appearance="secondary">
-                Continue
+                {t('deviceList.continue')}
               </Button>
             )}
           </div>
@@ -316,16 +322,16 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
           borderBottom: `1px solid ${tokens.colorNeutralStroke2}`
         }}
       >
-        <Field label="Connect via TCP/IP">
+        <Field label={t('deviceList.connectViaTcp')}>
           <div style={{ display: 'flex', gap: tokens.spacingHorizontalS, alignItems: 'end' }}>
             <Input
-              placeholder="IP Address (e.g., 192.168.1.100)"
+              placeholder={t('deviceList.ipAddress')}
               value={tcpIpAddress}
               onChange={(_, data) => setTcpIpAddress(data.value)}
               style={{ flex: 1 }}
             />
             <Input
-              placeholder="Port"
+              placeholder={t('deviceList.port')}
               value={tcpPort}
               onChange={(_, data) => setTcpPort(data.value)}
               style={{ width: '80px' }}
@@ -336,7 +342,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
               disabled={!tcpIpAddress.trim() || isTcpConnecting || isLoading}
               appearance="primary"
             >
-              {isTcpConnecting ? 'Adding...' : 'Add Bookmark'}
+              {isTcpConnecting ? t('deviceList.adding') : t('deviceList.addBookmark')}
             </Button>
           </div>
         </Field>
@@ -344,17 +350,17 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
 
       <CardPreview className={styles.deviceListContainer}>
         {error && (
-          <Body1 className={styles.messageArea}>Error: {error}</Body1> // Show error clearly
+          <Body1 className={styles.messageArea}>
+            {t('common.error')}: {error}
+          </Body1>
         )}
         {!error && isLoading && devices.length === 0 && (
           <div className={styles.messageArea}>
-            <Spinner size="small" /> Searching for devices...
+            <Spinner size="small" /> {t('deviceList.loading')}
           </div>
         )}
         {!error && !isLoading && devices.length === 0 && (
-          <Body1 className={styles.messageArea}>
-            No devices found. Ensure device is connected and in ADB mode.
-          </Body1>
+          <Body1 className={styles.messageArea}>{t('deviceList.noDevices')}</Body1>
         )}
         {!error && devices.length > 0 && (
           <div>
@@ -372,10 +378,11 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
               const showConnectionError = connectionError && lastFailedDeviceId === device.id
 
               let deviceStatusMessage = ''
-              if (device.type === 'offline') deviceStatusMessage = 'Offline'
+              if (device.type === 'offline') deviceStatusMessage = t('deviceList.offlineStatus')
               else if (device.type === 'unauthorized')
-                deviceStatusMessage = 'Unauthorized - Check device'
-              else if (device.type === 'unknown') deviceStatusMessage = 'Unknown State'
+                deviceStatusMessage = t('deviceList.unauthorizedStatus')
+              else if (device.type === 'unknown')
+                deviceStatusMessage = t('deviceList.unknownStatus')
 
               return (
                 <div
@@ -421,9 +428,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         !isConnectedBookmark && (
                           <div className={styles.warningText}>
                             <WarningRegular fontSize={16} />
-                            <Text size={200}>
-                              Not a recognized Quest device. Connection may have unintended results.
-                            </Text>
+                            <Text size={200}>{t('deviceList.notRecognizedQuest')}</Text>
                           </div>
                         )}
 
@@ -445,7 +450,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         <div className={styles.deviceDetailsLine}>
                           <StorageRegular fontSize={16} />
                           <Text size={200}>
-                            {`${device.storageFree} free / ${device.storageTotal} total`}
+                            {`${device.storageFree} ${t('deviceList.freeStorage')} / ${device.storageTotal} ${t('deviceList.totalStorage')}`}
                           </Text>
                         </div>
                       )}
@@ -453,7 +458,9 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                       {device.ipAddress && (
                         <div className={styles.deviceDetailsLine}>
                           <PlugDisconnectedRegular fontSize={16} />
-                          <Text size={200}>IP: {device.ipAddress}</Text>
+                          <Text size={200}>
+                            {t('deviceList.ipLabel')} {device.ipAddress}
+                          </Text>
                         </div>
                       )}
                     </div>
@@ -469,7 +476,9 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         aria-label="Bookmark device"
                         disabled={isAlreadyBookmarked}
                       >
-                        {isAlreadyBookmarked ? 'Bookmarked' : 'Bookmark'}
+                        {isAlreadyBookmarked
+                          ? t('deviceList.bookmarked')
+                          : t('deviceList.bookmark')}
                       </Button>
                     )}
 
@@ -489,7 +498,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                               style={{ color: tokens.colorNeutralForeground3 }}
                             />
                             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                              Checking...
+                              {t('deviceList.checking')}
                             </Text>
                           </>
                         )}
@@ -500,7 +509,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                               style={{ color: tokens.colorPaletteGreenForeground1 }}
                             />
                             <Text size={200} style={{ color: tokens.colorPaletteGreenForeground1 }}>
-                              Online{' '}
+                              {t('deviceList.onlineWithPing')}{' '}
                               {device.pingResponseTime ? `(${device.pingResponseTime}ms)` : ''}
                             </Text>
                           </>
@@ -512,7 +521,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                               style={{ color: tokens.colorPaletteRedForeground1 }}
                             />
                             <Text size={200} style={{ color: tokens.colorPaletteRedForeground1 }}>
-                              Offline
+                              {t('deviceList.offlineStatus')}
                             </Text>
                           </>
                         )}
@@ -538,7 +547,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         size="small"
                         aria-label="Delete bookmark"
                       >
-                        Delete
+                        {t('common.delete')}
                       </Button>
                     )}
 
@@ -553,7 +562,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         appearance="outline"
                         aria-label="Disconnect TCP device"
                       >
-                        Disconnect
+                        {t('deviceList.disconnect')}
                       </Button>
                     ) : isCurrentDeviceConnected ? (
                       <Button
@@ -562,7 +571,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         appearance="outline"
                         aria-label="Disconnect device"
                       >
-                        Disconnect
+                        {t('deviceList.disconnect')}
                       </Button>
                     ) : isWifiBookmark ? (
                       <Button
@@ -572,7 +581,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         aria-label="Connect to bookmarked device"
                         disabled={isConnecting}
                       >
-                        {isConnecting ? 'Connecting...' : 'Connect'}
+                        {isConnecting ? t('deviceList.connecting') : t('deviceList.connect')}
                       </Button>
                     ) : isConnectable ? (
                       <Button
@@ -581,7 +590,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         onClick={() => handleConnect(device.id)}
                         disabled={isLoading || isConnecting}
                       >
-                        {isConnecting ? 'Connecting...' : 'Connect'}
+                        {isConnecting ? t('deviceList.connecting') : t('deviceList.connect')}
                       </Button>
                     ) : (
                       // No button for non-connectable devices, or a disabled one if preferred
@@ -590,7 +599,7 @@ const DeviceList: React.FC<DeviceListProps> = ({ onSkip, onConnected }) => {
                         appearance="outline"
                         disabled={true}
                       >
-                        Cannot Connect
+                        {t('deviceList.cannotConnect')}
                       </Button>
                     )}
                   </div>

@@ -34,6 +34,7 @@ import {
 } from '@fluentui/react-icons'
 import { useMirrors } from '../hooks/useMirrors'
 import { Mirror } from '@shared/types'
+import { useTranslation } from '../hooks/useTranslation'
 
 const useStyles = makeStyles({
   container: {
@@ -92,6 +93,7 @@ const useStyles = makeStyles({
 
 const MirrorManagement: React.FC = () => {
   const styles = useStyles()
+  const { t } = useTranslation()
   const {
     mirrors,
     isLoading,
@@ -136,7 +138,7 @@ const MirrorManagement: React.FC = () => {
   }
 
   const handleRemoveMirror = async (id: string): Promise<void> => {
-    if (window.confirm('Are you sure you want to remove this mirror?')) {
+    if (window.confirm(t('mirrorManagement.confirmRemove'))) {
       await removeMirror(id)
     }
   }
@@ -172,23 +174,23 @@ const MirrorManagement: React.FC = () => {
 
   const getStatusText = (mirror: Mirror): string => {
     if (testingMirrors.has(mirror.id)) {
-      return 'Testing...'
+      return t('mirrorManagement.testing')
     }
 
     switch (mirror.testStatus) {
       case 'success':
-        return 'Online'
+        return t('mirrorManagement.online')
       case 'failed':
-        return 'Failed'
+        return t('mirrorManagement.failed')
       case 'testing':
-        return 'Testing...'
+        return t('mirrorManagement.testing')
       default:
-        return 'Untested'
+        return t('mirrorManagement.untested')
     }
   }
 
   const formatLastTested = (date?: Date): string => {
-    if (!date) return 'Never'
+    if (!date) return t('mirrorManagement.never')
     return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
       Math.round((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
       'day'
@@ -205,7 +207,7 @@ const MirrorManagement: React.FC = () => {
             onClick={handleTestAll}
             disabled={mirrors.length === 0}
           >
-            Test All
+            {t('mirrorManagement.testAll')}
           </Button>
           <Button
             appearance="secondary"
@@ -213,30 +215,21 @@ const MirrorManagement: React.FC = () => {
             onClick={handleImportFromFile}
             disabled={isImporting}
           >
-            {isImporting ? <Spinner size="tiny" /> : 'Import from File'}
+            {isImporting ? <Spinner size="tiny" /> : t('mirrorManagement.importFromFile')}
           </Button>
           <Dialog open={showAddDialog} onOpenChange={(_, data) => setShowAddDialog(data.open)}>
             <DialogTrigger disableButtonEnhancement>
               <Button appearance="primary" icon={<AddRegular />}>
-                Add Mirror
+                {t('mirrorManagement.addMirror')}
               </Button>
             </DialogTrigger>
             <DialogSurface>
-              <DialogTitle>Add New Mirror</DialogTitle>
+              <DialogTitle>{t('mirrorManagement.addNewMirror')}</DialogTitle>
               <DialogContent className={styles.dialogContent}>
                 <DialogBody>
-                  <Text>
-                    Paste your mirror configuration file content below. The configuration should be
-                    in INI format.
-                  </Text>
+                  <Text>{t('mirrorManagement.mirrorConfigHint')}</Text>
                   <Textarea
-                    placeholder={`Example:
-[VRP-mirror01]
-type = ftp
-host = example.com
-port = 21
-user = username
-pass = password`}
+                    placeholder={`${t('mirrorManagement.mirrorConfigPlaceholder')}`}
                     value={configContent}
                     onChange={(_, data) => setConfigContent(data.value)}
                     rows={8}
@@ -249,14 +242,14 @@ pass = password`}
                     onClick={() => setShowAddDialog(false)}
                     disabled={isAdding}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     appearance="primary"
                     onClick={handleAddMirror}
                     disabled={!configContent.trim() || isAdding}
                   >
-                    {isAdding ? <Spinner size="tiny" /> : 'Add Mirror'}
+                    {isAdding ? <Spinner size="tiny" /> : t('mirrorManagement.addMirror')}
                   </Button>
                 </DialogActions>
               </DialogContent>
@@ -275,13 +268,13 @@ pass = password`}
         <div
           style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalXL }}
         >
-          <Spinner size="medium" label="Loading mirrors..." />
+          <Spinner size="medium" label={t('common.loading')} />
         </div>
       ) : mirrors.length === 0 ? (
         <Card>
           <CardPreview>
             <div style={{ padding: tokens.spacingVerticalXL, textAlign: 'center' }}>
-              <Text>No mirrors configured. Add a mirror to get started.</Text>
+              <Text>{t('mirrorManagement.noMirrors')}</Text>
             </div>
           </CardPreview>
         </Card>
@@ -337,11 +330,11 @@ pass = password`}
               <CardPreview>
                 <div style={{ padding: tokens.spacingVerticalS }}>
                   <Text size={100} style={{ color: tokens.colorNeutralForeground3 }}>
-                    Last tested: {formatLastTested(mirror.lastTested)}
+                    {t('mirrorManagement.lastTested')} {formatLastTested(mirror.lastTested)}
                   </Text>
                   {mirror.testError && (
                     <Text size={100} style={{ color: tokens.colorPaletteRedForeground1 }}>
-                      Error: {mirror.testError}
+                      {t('common.error')}: {mirror.testError}
                     </Text>
                   )}
                   <div className={styles.actions}>
@@ -355,7 +348,7 @@ pass = password`}
                       }}
                       disabled={testingMirrors.has(mirror.id)}
                     >
-                      Test
+                      {t('mirrorManagement.test')}
                     </Button>
                     <Button
                       size="small"
@@ -366,7 +359,7 @@ pass = password`}
                         handleRemoveMirror(mirror.id)
                       }}
                     >
-                      Remove
+                      {t('mirrorManagement.remove')}
                     </Button>
                   </div>
                 </div>

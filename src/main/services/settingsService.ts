@@ -18,7 +18,8 @@ class SettingsService extends EventEmitter implements SettingsAPI {
       downloadSpeedLimit: 0,
       uploadSpeedLimit: 0,
       hideAdultContent: true,
-      colorScheme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+      colorScheme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
+      language: 'en'
     }
 
     // Load settings from disk
@@ -55,14 +56,24 @@ class SettingsService extends EventEmitter implements SettingsAPI {
     this.emit('upload-speed-limit-changed', limit)
   }
 
-  getColorScheme(): 'light' | 'dark' {
+  getColorScheme(): 'light' | 'dark' | 'auto' {
     return this.settings.colorScheme
   }
 
-  setColorScheme(scheme: 'light' | 'dark'): void {
+  setColorScheme(scheme: 'light' | 'dark' | 'auto'): void {
     this.settings.colorScheme = scheme
     this.saveSettings()
     this.emit('color-scheme-changed', scheme)
+  }
+
+  getLanguage(): 'en' | 'tr' {
+    return this.settings.language
+  }
+
+  setLanguage(lang: 'en' | 'tr'): void {
+    this.settings.language = lang
+    this.saveSettings()
+    this.emit('language-changed', lang)
   }
 
   private loadSettings(): void {

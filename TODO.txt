@@ -1,0 +1,26 @@
+▼
+Todo
+[✓]
+Fix grid vertical gap in GameGrid.tsx
+[✓]
+Fix logo visibility in Sidebar.tsx
+[✓]
+Make views flex to bottom
+[✓]
+Add dark mode scrollbar styling
+[✓]
+Add Grid/List/Table view modes to GamesView
+[✓]
+Create design tokens system for scalability
+[✓]
+Fix bottom empty space in all views
+[ ]
+Phase 3: Add Dark Mode setting (Auto/Light/Dark)
+[ ]
+Phase 4: Split sidebar into Navigation + Transfers sections
+[ ]
+Phase 5: Create Transfers panel (Download/Upload + progress)
+[ ]
+Phase 6: Collapsed sidebar - vertical progress bar animation
+[ ]
+Phase 7: Final polish and animations
