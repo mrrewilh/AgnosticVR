@@ -7,8 +7,7 @@ import {
   SettingsRegular,
   PhoneRegular,
   ChevronLeftRegular,
-  ChevronRightRegular,
-  ArrowUploadFilled
+  ChevronRightRegular
 } from '@fluentui/react-icons'
 import { useTranslation } from '../hooks/useTranslation'
 import logoIcon from '../assets/icon.svg'
@@ -35,7 +34,7 @@ const useStyles = makeStyles({
     height: '100%',
     backgroundColor: tokens.colorNeutralBackground4,
     borderRight: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke1}`,
-    transition: 'width 0.2s ease-in-out',
+    transition: 'width 0.3s ease-in-out',
     overflow: 'hidden'
   },
   collapsed: {
@@ -67,12 +66,18 @@ const useStyles = makeStyles({
     minWidth: '28px',
     minHeight: '28px'
   },
-  nav: {
+  navSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: tokens.spacingVerticalS,
+    gap: tokens.spacingVerticalXS
+  },
+  transfersSection: {
     display: 'flex',
     flexDirection: 'column',
     padding: tokens.spacingVerticalS,
     gap: tokens.spacingVerticalXS,
-    flex: 1
+    marginTop: 'auto'
   },
   navItem: {
     display: 'flex',
@@ -111,13 +116,6 @@ const useStyles = makeStyles({
   divider: {
     margin: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`
   },
-  quickActions: {
-    padding: tokens.spacingHorizontalM
-  },
-  quickActionsTitle: {
-    marginBottom: tokens.spacingVerticalS,
-    color: tokens.colorNeutralForeground3
-  },
   statusSection: {
     padding: tokens.spacingHorizontalM,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke1}`
@@ -144,6 +142,19 @@ const useStyles = makeStyles({
   },
   disconnected: {
     backgroundColor: tokens.colorPaletteRedBackground3
+  },
+  collapsedProgressContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: tokens.spacingVerticalXS,
+    minHeight: '50px',
+    maxHeight: '60px'
+  },
+  collapsedProgressBar: {
+    width: '6px',
+    height: '40px'
   }
 })
 
@@ -162,34 +173,93 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navItems: { id: NavItem; icon: React.ReactNode; label: string }[] = [
     { id: 'devices', icon: <PhoneRegular />, label: t('nav.devices') },
     { id: 'games', icon: <DesktopRegular />, label: t('nav.games') },
-    { id: 'downloads', icon: <ArrowDownloadRegular />, label: t('nav.downloads') },
-    { id: 'uploads', icon: <ArrowUploadRegular />, label: t('nav.uploads') },
     { id: 'settings', icon: <SettingsRegular />, label: t('nav.settings') }
   ]
 
-  const quickActions = [{ id: 'upload', icon: <ArrowUploadFilled />, label: t('nav.uploadGames') }]
+  const transferItems: { id: NavItem; icon: React.ReactNode; label: string }[] = [
+    { id: 'downloads', icon: <ArrowDownloadRegular />, label: t('nav.downloads') },
+    { id: 'uploads', icon: <ArrowUploadRegular />, label: t('nav.uploads') }
+  ]
 
-  return (
-    <div className={`${styles.root} ${collapsed ? styles.collapsed : ''}`}>
-      <div className={styles.header}>
-        {!collapsed && (
-          <div className={styles.logo}>
-            <img src={logoIcon} alt="logo" className={styles.logoIcon} />
-            <Text weight="semibold" className={styles.logoText}>
-              MythicQuest
-            </Text>
+  const hasProgress =
+    (downloadProgress !== undefined && downloadProgress > 0) ||
+    (uploadProgress !== undefined && uploadProgress > 0)
+
+  if (collapsed) {
+    return (
+      <div className={`${styles.root} ${styles.collapsed}`}>
+        <div className={styles.header}>
+          <Button
+            appearance="subtle"
+            icon={<ChevronRightRegular />}
+            onClick={onToggleCollapse}
+            className={styles.collapseBtn}
+            aria-label="Expand sidebar"
+          />
+        </div>
+
+        <nav className={styles.navSection}>
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              className={`${styles.navItem} ${styles.navItemHover} ${
+                activeItem === item.id ? styles.navItemActive : ''
+              }`}
+              onClick={() => onNavigate(item.id)}
+              title={item.label}
+            >
+              <span className={styles.navIcon}>{item.icon}</span>
+            </button>
+          ))}
+        </nav>
+
+        <nav className={styles.transfersSection}>
+          {transferItems.map((item) => (
+            <button
+              key={item.id}
+              className={`${styles.navItem} ${styles.navItemHover} ${
+                activeItem === item.id ? styles.navItemActive : ''
+              }`}
+              onClick={() => onNavigate(item.id)}
+              title={item.label}
+            >
+              <span className={styles.navIcon}>{item.icon}</span>
+            </button>
+          ))}
+        </nav>
+
+        {hasProgress && (
+          <div className={styles.collapsedProgressContainer}>
+            <ProgressBar
+              value={(downloadProgress || uploadProgress || 0) / 100}
+              className={styles.collapsedProgressBar}
+              thickness="medium"
+            />
           </div>
         )}
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.root}>
+      <div className={styles.header}>
+        <div className={styles.logo}>
+          <img src={logoIcon} alt="logo" className={styles.logoIcon} />
+          <Text weight="semibold" className={styles.logoText}>
+            AgnosticVR
+          </Text>
+        </div>
         <Button
           appearance="subtle"
-          icon={collapsed ? <ChevronRightRegular /> : <ChevronLeftRegular />}
+          icon={<ChevronLeftRegular />}
           onClick={onToggleCollapse}
           className={styles.collapseBtn}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label="Collapse sidebar"
         />
       </div>
 
-      <nav className={styles.nav}>
+      <nav className={styles.navSection}>
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -197,71 +267,66 @@ const Sidebar: React.FC<SidebarProps> = ({
               activeItem === item.id ? styles.navItemActive : ''
             }`}
             onClick={() => onNavigate(item.id)}
-            title={collapsed ? item.label : undefined}
           >
             <span className={styles.navIcon}>{item.icon}</span>
-            {!collapsed && <Text className={styles.navLabel}>{item.label}</Text>}
+            <Text className={styles.navLabel}>{item.label}</Text>
           </button>
         ))}
       </nav>
 
-      {!collapsed && (
-        <>
-          <Divider className={styles.divider} />
-          <div className={styles.quickActions}>
-            <Text size={200} className={styles.quickActionsTitle}>
-              {t('nav.quickActions')}
+      <Divider className={styles.divider} />
+
+      <nav className={styles.transfersSection}>
+        <Text
+          size={200}
+          style={{ color: tokens.colorNeutralForeground3, paddingLeft: tokens.spacingHorizontalM }}
+        >
+          {t('nav.transfers')}
+        </Text>
+        {transferItems.map((item) => (
+          <button
+            key={item.id}
+            className={`${styles.navItem} ${styles.navItemHover} ${
+              activeItem === item.id ? styles.navItemActive : ''
+            }`}
+            onClick={() => onNavigate(item.id)}
+          >
+            <span className={styles.navIcon}>{item.icon}</span>
+            <Text className={styles.navLabel}>{item.label}</Text>
+          </button>
+        ))}
+      </nav>
+
+      <div className={styles.statusSection}>
+        <div className={styles.statusItem}>
+          <div className={styles.statusLabel}>
+            <span
+              className={`${styles.statusDot} ${
+                deviceConnected ? styles.connected : styles.disconnected
+              }`}
+            />
+            <Text size={200}>{deviceConnected ? t('nav.deviceConnected') : t('nav.noDevice')}</Text>
+          </div>
+        </div>
+
+        {downloadProgress !== undefined && downloadProgress > 0 && (
+          <div className={styles.statusItem}>
+            <Text size={200} className={styles.statusLabel}>
+              <ArrowDownloadRegular /> {t('common.downloading')}
             </Text>
-            {quickActions.map((action) => (
-              <button
-                key={action.id}
-                className={`${styles.navItem} ${styles.navItemHover}`}
-                onClick={() => {
-                  if (action.id === 'upload') {
-                    onNavigate('uploads')
-                  }
-                }}
-              >
-                <span className={styles.navIcon}>{action.icon}</span>
-                <Text className={styles.navLabel}>{action.label}</Text>
-              </button>
-            ))}
+            <ProgressBar value={downloadProgress / 100} />
           </div>
+        )}
 
-          <div className={styles.statusSection}>
-            <div className={styles.statusItem}>
-              <div className={styles.statusLabel}>
-                <span
-                  className={`${styles.statusDot} ${
-                    deviceConnected ? styles.connected : styles.disconnected
-                  }`}
-                />
-                <Text size={200}>
-                  {deviceConnected ? t('nav.deviceConnected') : t('nav.noDevice')}
-                </Text>
-              </div>
-            </div>
-
-            {downloadProgress !== undefined && downloadProgress > 0 && (
-              <div className={styles.statusItem}>
-                <Text size={200} className={styles.statusLabel}>
-                  <ArrowDownloadRegular /> {t('common.downloading')}
-                </Text>
-                <ProgressBar value={downloadProgress} />
-              </div>
-            )}
-
-            {uploadProgress !== undefined && uploadProgress > 0 && (
-              <div className={styles.statusItem}>
-                <Text size={200} className={styles.statusLabel}>
-                  <ArrowUploadRegular /> {t('common.uploading')}
-                </Text>
-                <ProgressBar value={uploadProgress} />
-              </div>
-            )}
+        {uploadProgress !== undefined && uploadProgress > 0 && (
+          <div className={styles.statusItem}>
+            <Text size={200} className={styles.statusLabel}>
+              <ArrowUploadRegular /> {t('common.uploading')}
+            </Text>
+            <ProgressBar value={uploadProgress / 100} />
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }

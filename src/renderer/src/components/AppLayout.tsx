@@ -400,7 +400,7 @@ const AppLayout: React.FC = () => {
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                 activeItem={activeNavItem}
                 onNavigate={handleNavClick}
-                deviceConnected={currentView === AppView.GAMES}
+                deviceConnected={false}
                 downloadProgress={downloadProgress}
                 uploadProgress={uploadProgress}
               />

@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=MythicQuestVR
+Name=AgnosticVR
 Comment=A modern, cross-platform desktop application designed for managing and sideloading content onto Meta Quest devices
-Exec=mythicquestvr %U
-Icon=mythicquestvr
+Exec=agnosticvr %U
+Icon=agnosticvr
 Categories=Games;
 Terminal=false
-MimeType=x-scheme-handler/mythicquestvr;
-StartupWMClass=mythicquestvr 
+MimeType=x-scheme-handler/agnosticvr;
+StartupWMClass=agnosticvr 

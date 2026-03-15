@@ -311,7 +311,7 @@ export function UpdateNotification(): React.ReactElement | null {
                   onClick={() => window.api.updates?.openRepositoryPage?.()}
                   style={{ padding: '0', height: 'auto', minHeight: 'auto' }}
                 >
-                  {t('update.githubRepo')} (https://github.com/slax81/mythicquestvr)
+                  {t('update.githubRepo')} (https://github.com/slax81/agnosticvr)
                 </Button>{' '}
               </Text>
             </div>

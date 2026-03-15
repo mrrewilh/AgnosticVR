@@ -20,25 +20,25 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
   const [language, setLanguageState] = useState<Language>('en')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [systemColorScheme, setSystemColorScheme] = useState<'light' | 'dark'>(() =>
+    getSystemColorScheme()
+  )
 
   const resolvedColorScheme = useMemo((): 'light' | 'dark' => {
     if (colorScheme === 'auto') {
-      return getSystemColorScheme()
+      return systemColorScheme
     }
     return colorScheme
-  }, [colorScheme])
+  }, [colorScheme, systemColorScheme])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = () => {
-      if (colorScheme === 'auto') {
-        // Force re-render when system theme changes in auto mode
-        setColorSchemeState('auto')
-      }
+    const handleChange = (e: MediaQueryListEvent): void => {
+      setSystemColorScheme(e.matches ? 'dark' : 'light')
     }
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [colorScheme])
+  }, [])
 
   // Load initial settings when component mounts
   useEffect(() => {

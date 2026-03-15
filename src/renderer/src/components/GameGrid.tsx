@@ -134,7 +134,7 @@ const GameGrid: React.FC<GameGridProps> = ({
                       <div className="game-grid-status">{getStatusBadge(game, downloadStatus)}</div>
                       {downloadStatus && (
                         <div className="game-grid-progress">
-                          <ProgressBar value={downloadStatus.progress} />
+                          <ProgressBar value={downloadStatus.progress / 100} />
                         </div>
                       )}
                       <div className="game-grid-button">

@@ -119,7 +119,7 @@ const MirrorSelector: React.FC = () => {
             handleMirrorChange(data.optionValue)
           }
         }}
-        placeholder="Select mirror..."
+        placeholder={t('common.selectMirror')}
       >
         <Option value="public" text="Public Mirror">
           Public Mirror

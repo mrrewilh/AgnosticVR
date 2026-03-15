@@ -13,6 +13,7 @@ import {
 import { useAdb } from '../hooks/useAdb'
 import { useGames } from '../hooks/useGames'
 import { useDownload } from '../hooks/useDownload'
+import { useTranslation } from '../hooks/useTranslation'
 import { GameInfo } from '@shared/types'
 import placeholderImage from '../assets/images/game-placeholder.png'
 import {
@@ -263,6 +264,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
   } = useDownload()
 
   const styles = useStyles()
+  const { t } = useTranslation()
 
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
@@ -475,7 +477,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
       },
       {
         accessorKey: 'name',
-        header: 'Name / Package',
+        header: t('games.table.namePackage'),
         size: nameColumnWidth > 0 ? nameColumnWidth : COLUMN_WIDTHS.MIN_NAME_PACKAGE,
         cell: ({ row }) => {
           const game = row.original
@@ -550,7 +552,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
       },
       {
         accessorKey: 'version',
-        header: 'Version',
+        header: t('games.table.version'),
         size: COLUMN_WIDTHS.VERSION,
         cell: ({ row }) => {
           const listVersion = row.original.version
@@ -562,7 +564,9 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
               <div className="list-version-main">{displayListVersion}</div>
               {isInstalled && (
                 <div className="installed-version-info">
-                  {deviceVersion !== undefined ? `Installed: v${deviceVersion}` : 'Installed'}
+                  {deviceVersion !== undefined
+                    ? `${t('games.table.installedVersion', { version: deviceVersion })}`
+                    : t('games.table.installed')}
                 </div>
               )}
             </div>
@@ -572,7 +576,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
       },
       {
         accessorKey: 'downloads',
-        header: 'Popularity',
+        header: t('games.table.popularity'),
         size: COLUMN_WIDTHS.POPULARITY,
         cell: (info) => {
           const count = info.getValue()
@@ -582,26 +586,26 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
       },
       {
         accessorKey: 'size',
-        header: 'Size',
+        header: t('games.table.size'),
         size: COLUMN_WIDTHS.SIZE,
         cell: (info) => info.getValue() || '-',
         enableResizing: true
       },
       {
         accessorKey: 'lastUpdated',
-        header: 'Last Updated',
+        header: t('games.table.lastUpdated'),
         size: COLUMN_WIDTHS.LAST_UPDATED,
         cell: (info) => info.getValue() || '-',
         enableResizing: true
       },
       {
         accessorKey: 'isInstalled',
-        header: 'Installed Status',
+        header: t('games.table.installedStatus'),
         enableResizing: false
       },
       {
         accessorKey: 'hasUpdate',
-        header: 'Update Status',
+        header: t('games.table.updateStatus'),
         enableResizing: false
       }
     ]
@@ -632,7 +636,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
   })
 
   const formatDate = (date: Date | null): string => {
-    if (!date) return 'Never'
+    if (!date) return t('games.table.never')
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
@@ -1230,7 +1234,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
         <div className="games-toolbar">
           <div className="games-toolbar-left">
             <Button icon={<ArrowClockwiseRegular />} onClick={refreshGames} disabled={isBusy}>
-              {isBusy ? 'Working...' : 'Refresh Games'}
+              {isBusy ? t('games.working') : t('games.refreshGames')}
             </Button>
             <Button
               icon={<ArrowClockwiseRegular />}
@@ -1242,7 +1246,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
                   : 'Refresh installed packages on the device'
               }
             >
-              {isBusy ? 'Working...' : 'Refresh Quest'}
+              {isBusy ? t('games.working') : t('games.refreshQuest')}
             </Button>
             <Menu>
               <MenuTrigger disableButtonEnhancement>
@@ -1345,7 +1349,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
           />
         </div>
         {isBusy && !loadingGames && !downloadProgress && !extractProgress && (
-          <div className="loading-indicator">Processing...</div>
+          <div className="loading-indicator">{t('common.processing')}</div>
         )}
 
         {installStatusMessage && <div className="loading-indicator">{installStatusMessage}</div>}
@@ -1364,9 +1368,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
         ) : gamesError ? (
           <div className="error-message">{gamesError}</div>
         ) : games.length === 0 && !loadingGames ? (
-          <div className="no-games-message">
-            No games found. Click &quot;Refresh Games&quot; to sync the game library.
-          </div>
+          <div className="no-games-message">{t('games.noGames')}</div>
         ) : (
           <>
             <GamesViewContent
@@ -1438,7 +1440,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
                         }}
                       >
                         <Spinner size="small" />
-                        <Text>Processing...</Text>
+                        <Text>{t('common.processing')}</Text>
                       </div>
                     )}
                     {installSuccess !== null && (
@@ -1472,7 +1474,7 @@ const GamesView: React.FC<GamesViewProps> = ({ onBackToDevices }) => {
                       onClick={closeInstallDialog}
                       disabled={isManualInstalling}
                     >
-                      {isManualInstalling ? 'Processing...' : 'Close'}
+                      {isManualInstalling ? t('common.processing') : t('common.close')}
                     </Button>
                   </DialogActions>
                 </DialogBody>

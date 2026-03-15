@@ -393,11 +393,13 @@ const Settings: React.FC = () => {
     downloadPath,
     downloadSpeedLimit,
     uploadSpeedLimit,
+    colorScheme,
     isLoading,
     error,
     setDownloadPath,
     setDownloadSpeedLimit,
     setUploadSpeedLimit,
+    setColorScheme,
     setLanguage
   } = useSettings()
   const [editedDownloadPath, setEditedDownloadPath] = useState(downloadPath)
@@ -716,6 +718,48 @@ const Settings: React.FC = () => {
                 </Option>
                 <Option value="tr" text="Türkçe">
                   Türkçe
+                </Option>
+              </Dropdown>
+            </div>
+          </div>
+        </Card>
+
+        <Card className={styles.card}>
+          <CardHeader
+            description={<Subtitle1 weight="semibold">{t('settings.appearance')}</Subtitle1>}
+          />
+          <div className={styles.cardContent}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM }}>
+              <Text>{t('settings.theme')}</Text>
+              <Dropdown
+                style={{ minWidth: '150px' }}
+                value={
+                  colorScheme === 'auto'
+                    ? t('theme.auto')
+                    : colorScheme === 'dark'
+                      ? t('theme.dark')
+                      : t('theme.light')
+                }
+                selectedOptions={[colorScheme]}
+                onOptionSelect={(_, data) => {
+                  if (
+                    data.optionValue === 'auto' ||
+                    data.optionValue === 'light' ||
+                    data.optionValue === 'dark'
+                  ) {
+                    setColorScheme(data.optionValue)
+                  }
+                }}
+                mountNode={document.getElementById('portal')}
+              >
+                <Option value="auto" text={t('theme.auto')}>
+                  {t('theme.auto')}
+                </Option>
+                <Option value="light" text={t('theme.light')}>
+                  {t('theme.light')}
+                </Option>
+                <Option value="dark" text={t('theme.dark')}>
+                  {t('theme.dark')}
                 </Option>
               </Dropdown>
             </div>

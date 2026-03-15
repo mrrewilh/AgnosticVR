@@ -353,9 +353,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, onExecut
             <ArrowUpRegular /> <ArrowDownRegular /> to navigate
           </Text>
           <Text size={200}>•</Text>
-          <Text size={200}>Enter to select</Text>
+          <Text size={200}>{t('common.enterToSelect')}</Text>
           <Text size={200}>•</Text>
-          <Text size={200}>Esc to close</Text>
+          <Text size={200}>{t('common.escToClose')}</Text>
         </div>
       </div>
     </div>

@@ -109,7 +109,7 @@ const GameList: React.FC<GameListProps> = ({
                 {getStatusBadge(game, downloadStatus)}
                 {downloadStatus && (
                   <div className="game-list-progress">
-                    <ProgressBar value={downloadStatus.progress} />
+                    <ProgressBar value={downloadStatus.progress / 100} />
                   </div>
                 )}
                 {!game.isInstalled && !downloadStatus && (

@@ -58,6 +58,9 @@ function createWindow(): void {
   const defaultWidth = 1200
   const defaultHeight = 700
 
+  const minWidth = 800
+  const minHeight = 500
+
   const windowWidth = Math.min(defaultWidth, workAreaWidth)
   const windowHeight = Math.min(defaultHeight, workAreaHeight)
 
@@ -65,11 +68,11 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    minWidth: Math.min(defaultWidth, workAreaWidth),
-    minHeight: Math.min(defaultHeight, workAreaHeight),
+    minWidth: Math.max(minWidth, Math.min(400, workAreaWidth)),
+    minHeight: Math.max(minHeight, Math.min(300, workAreaHeight)),
     show: false,
     autoHideMenuBar: true,
-    title: 'mythicquestvr',
+    title: 'agnosticvr',
     icon: icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -80,8 +83,8 @@ function createWindow(): void {
 
   // Explicitly set minimum size to ensure constraint is enforced
   mainWindow.setMinimumSize(
-    Math.min(defaultWidth, workAreaWidth),
-    Math.min(defaultHeight, workAreaHeight)
+    Math.max(minWidth, Math.min(400, workAreaWidth)),
+    Math.max(minHeight, Math.min(300, workAreaHeight))
   )
 
   mainWindow.on('ready-to-show', async () => {
@@ -196,7 +199,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.mythicquestvr')
+  electronApp.setAppUserModelId('com.agnosticvr')
 
   // Setup file protocol handler for local resources
   protocol.registerFileProtocol('file', (request, callback) => {
@@ -209,7 +212,7 @@ app.whenReady().then(async () => {
   session.defaultSession.webRequest.onBeforeSendHeaders(
     { urls: ['https://*.youtube.com/*', 'https://*.googlevideo.com/*'] },
     (details, callback) => {
-      details.requestHeaders['Referer'] = 'https://github.com/slax81/MythicQuestVR'
+      details.requestHeaders['Referer'] = 'https://github.com/slax81/AgnosticVR'
       callback({ requestHeaders: details.requestHeaders })
     }
   )

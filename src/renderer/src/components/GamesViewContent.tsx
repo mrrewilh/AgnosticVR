@@ -278,7 +278,7 @@ const GamesViewContent: React.FC<GamesViewContentProps> = ({
                 downloadInfo.status !== 'Completed' &&
                 downloadInfo.status !== 'Queued' && (
                   <div className={styles.statusIconCell} style={{ marginTop: '4px' }}>
-                    <ProgressBar value={downloadInfo.progress} style={{ width: '80%' }} />
+                    <ProgressBar value={downloadInfo.progress / 100} style={{ width: '80%' }} />
                   </div>
                 )}
             </div>
@@ -354,8 +354,9 @@ const GamesViewContent: React.FC<GamesViewContentProps> = ({
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 72,
-    overscan: 10
+    estimateSize: () => 80,
+    overscan: 10,
+    gap: 4
   })
 
   const handleRowClick = useCallback(

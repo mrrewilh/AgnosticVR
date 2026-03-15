@@ -29,7 +29,7 @@ class UpdateService extends EventEmitter {
 
       // Get the commit SHA for the current version tag
       const currentTagResponse = await axios.get(
-        `https://api.github.com/repos/slax81/mythicquestvr/git/ref/tags/v${currentVersion}`
+        `https://api.github.com/repos/slax81/agnosticvr/git/ref/tags/v${currentVersion}`
       )
 
       if (currentTagResponse.status !== 200) {
@@ -41,7 +41,7 @@ class UpdateService extends EventEmitter {
 
       // Get commits since the current version
       const commitsResponse = await axios.get(
-        `https://api.github.com/repos/slax81/mythicquestvr/commits?since=${new Date(
+        `https://api.github.com/repos/slax81/agnosticvr/commits?since=${new Date(
           Date.now() - 365 * 24 * 60 * 60 * 1000
         ).toISOString()}&per_page=100`
       )
@@ -112,7 +112,7 @@ class UpdateService extends EventEmitter {
 
       // Get latest release from GitHub API
       const response = await axios.get(
-        'https://api.github.com/repos/slax81/mythicquestvr/releases/latest'
+        'https://api.github.com/repos/slax81/agnosticvr/releases/latest'
       )
 
       if (response.status === 200) {
@@ -182,7 +182,7 @@ class UpdateService extends EventEmitter {
    * Open releases page in browser
    */
   public openReleasesPage(): void {
-    const releasesUrl = 'https://github.com/slax81/mythicquestvr/releases'
+    const releasesUrl = 'https://github.com/slax81/agnosticvr/releases'
     console.log('Opening releases page:', releasesUrl)
     shell.openExternal(releasesUrl)
   }
@@ -191,7 +191,7 @@ class UpdateService extends EventEmitter {
    * Open repository page in browser
    */
   public openRepositoryPage(): void {
-    const repositoryUrl = 'https://github.com/slax81/mythicquestvr'
+    const repositoryUrl = 'https://github.com/slax81/agnosticvr'
     console.log('Opening repository page:', repositoryUrl)
     shell.openExternal(repositoryUrl)
   }

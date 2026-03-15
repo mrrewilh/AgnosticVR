@@ -198,6 +198,11 @@
   overflow: hidden;
 }
 
+/* Add vertical spacing between table rows */
+.games-table tbody tr {
+  margin-bottom: 8px;
+}
+
 .games-table td {
   white-space: nowrap;
   text-overflow: ellipsis;

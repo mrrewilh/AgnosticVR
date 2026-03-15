@@ -250,7 +250,7 @@ export class DownloadProcessor {
 
     // Create unique mount point for this download (sanitize name to avoid issues)
     const sanitizedName = item.releaseName.replace(/[^a-zA-Z0-9-]/g, '_')
-    const mountPoint = join(tmpdir(), `mythicquestvr-mount-${sanitizedName}-${Date.now()}`)
+    const mountPoint = join(tmpdir(), `agnosticvr-mount-${sanitizedName}-${Date.now()}`)
 
     try {
       // Create download directory
